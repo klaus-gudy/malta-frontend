@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body { font-family:'IBM Plex Sans', system-ui, sans-serif; color:#1a1a1a; background:#faf9f6; -webkit-font-smoothing:antialiased; font-size:13px; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:#d6d1c7; border-radius:6px; border:2px solid #faf9f6; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  input, select, textarea, button { font-family:inherit; }
+  button { cursor:pointer; }
+  table { border-collapse:collapse; width:100%; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(6px);} to {opacity:1; transform:none;} }
+  @keyframes fadeIn { from { opacity:0;} to {opacity:1;} }
+  @keyframes spin { to { transform:rotate(360deg);} }
+  .mlrow:hover { background:#faf8f3 !important; }
+  .mlnav:hover { background:#33302b !important; }
+  .mlbtn:hover { filter:brightness(0.93); }
+  .mlghost:hover { background:#f3efe7 !important; }
+</style>
+</helmet>
+
+{{ themeCSS }}
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh;display:flex;animation:fadeIn .4s ease;">
+    <div style="flex:1;background:#1a1a1a;color:#f6f3ee;padding:56px 64px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:34px;height:34px;border-radius:7px;background:var(--am-accent,#b45309);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;">M</div>
+        <div style="font-weight:600;font-size:16px;letter-spacing:.01em;">Malta Microfinance</div>
+      </div>
+      <div style="max-width:440px;">
+        <div style="font-size:34px;line-height:1.18;font-weight:600;letter-spacing:-0.01em;">Lending operations,<br>from onboarding to closure.</div>
+        <div style="margin-top:18px;color:#a8a298;font-size:14px;line-height:1.6;">Customer onboarding, KYC, loan origination, approvals, disbursement and collections — one operational console for the whole portfolio.</div>
+        <div style="margin-top:40px;display:flex;gap:30px;">
+          <div><div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:#e8a04f;">TZS 4.2B</div><div style="font-size:11px;color:#8a857c;letter-spacing:.05em;text-transform:uppercase;margin-top:4px;">Portfolio</div></div>
+          <div><div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:#e8a04f;">3,418</div><div style="font-size:11px;color:#8a857c;letter-spacing:.05em;text-transform:uppercase;margin-top:4px;">Active loans</div></div>
+          <div><div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:#e8a04f;">11</div><div style="font-size:11px;color:#8a857c;letter-spacing:.05em;text-transform:uppercase;margin-top:4px;">Branches</div></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#6f6a61;">Dar es Salaam · Tanzania · TZS</div>
+    </div>
+    <div style="width:480px;max-width:42vw;background:#faf9f6;display:flex;align-items:center;justify-content:center;padding:40px;">
+      <div style="width:100%;max-width:340px;">
+        <sc-if value="{{ loginIsReset }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .3s ease;">
+            <div style="font-size:22px;font-weight:600;">Reset password</div>
+            <div style="color:#7a756c;margin-top:8px;font-size:13px;line-height:1.5;">Enter your work email and we'll send a secure reset link to your inbox.</div>
+            <div style="margin-top:24px;">
+              <label style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8a857c;">Work email</label>
+              <input name="resetEmail" value="{{ form.resetEmail }}" onChange="{{ onInput }}" placeholder="you@maltamfi.co.tz" style="width:100%;margin-top:7px;height:42px;padding:0 13px;border:1px solid #d6d1c7;border-radius:6px;background:#fff;font-size:14px;outline:none;">
+            </div>
+            <button onClick="{{ doResetRequest }}" class="mlbtn" style="width:100%;margin-top:18px;height:42px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:6px;font-weight:600;font-size:14px;">Send reset link</button>
+            <button onClick="{{ backToLogin }}" class="mlghost" style="width:100%;margin-top:10px;height:38px;background:transparent;color:#6f6a61;border:none;border-radius:6px;font-size:13px;">Back to sign in</button>
+            <sc-if value="{{ resetSent }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;padding:11px 13px;background:#e6f4ee;border:1px solid #b8dcc9;border-radius:6px;font-size:12.5px;color:#0c6b48;">Reset link sent. Check your inbox.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ loginIsSignin }}" hint-placeholder-val="{{ true }}">
+          <div style="animation:fadeUp .3s ease;">
+            <div style="font-size:22px;font-weight:600;">Sign in</div>
+            <div style="color:#7a756c;margin-top:8px;font-size:13px;">Welcome back. Sign in to continue.</div>
+            <div style="margin-top:24px;">
+              <label style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8a857c;">Username</label>
+              <input name="username" value="{{ form.username }}" onChange="{{ onInput }}" style="width:100%;margin-top:7px;height:42px;padding:0 13px;border:1px solid #d6d1c7;border-radius:6px;background:#fff;font-size:14px;outline:none;">
+            </div>
+            <div style="margin-top:14px;">
+              <label style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8a857c;">Password</label>
+              <input name="password" type="password" value="{{ form.password }}" onChange="{{ onInput }}" placeholder="••••••••" style="width:100%;margin-top:7px;height:42px;padding:0 13px;border:1px solid #d6d1c7;border-radius:6px;background:#fff;font-size:14px;outline:none;">
+            </div>
+            <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:12px;font-size:12.5px;color:#b91c1c;">{{ loginError }}</div>
+            </sc-if>
+            <button onClick="{{ doLogin }}" class="mlbtn" style="width:100%;margin-top:20px;height:44px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:6px;font-weight:600;font-size:14px;">Sign in</button>
+            <div style="margin-top:14px;text-align:center;"><span onClick="{{ goReset }}" style="color:var(--am-accent-dark,#92400e);font-size:12.5px;cursor:pointer;font-weight:500;">Forgot password?</span></div>
+            <div style="margin-top:26px;border-top:1px solid #e7e3da;padding-top:16px;">
+              <div style="font-size:11px;color:#9a948a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;">Demo accounts — one click</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+                <sc-for list="{{ demoAccounts }}" as="acc" hint-placeholder-count="5">
+                  <button onClick="{{ acc.login }}" class="mlghost" style="text-align:left;padding:8px 10px;background:#fff;border:1px solid #e0dbd1;border-radius:6px;">
+                    <div style="font-weight:600;font-size:12px;">{{ acc.role }}</div>
+                    <div style="font-size:10.5px;color:#9a948a;font-family:'IBM Plex Mono',monospace;">{{ acc.user }}</div>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;min-height:100vh;background:#faf9f6;">
+    <!-- SIDEBAR -->
+    <aside style="width:{{ navWidth }}px;flex-shrink:0;background:#1f1d1a;color:#cfc9bf;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;transition:width .18s ease;">
+      <div style="height:56px;display:flex;align-items:center;gap:11px;padding:0 16px;border-bottom:1px solid #322f2a;flex-shrink:0;">
+        <div style="width:30px;height:30px;border-radius:7px;background:var(--am-accent,#b45309);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;">M</div>
+        <sc-if value="{{ navExpanded }}" hint-placeholder-val="{{ true }}">
+          <div style="min-width:0;"><div style="font-weight:600;font-size:13.5px;color:#f4f1ec;white-space:nowrap;">Malta MFI</div><div style="font-size:10px;color:#7d776d;white-space:nowrap;">Loan Management</div></div>
+        </sc-if>
+      </div>
+      <nav style="flex:1;overflow-y:auto;padding:10px 9px;">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="9">
+          <div onClick="{{ item.go }}" class="mlnav" style="display:flex;align-items:center;gap:11px;padding:9px 9px;border-radius:6px;margin-bottom:2px;cursor:pointer;background:{{ item.bg }};color:{{ item.fg }};white-space:nowrap;overflow:hidden;">
+            <span style="width:18px;text-align:center;flex-shrink:0;font-size:14px;">{{ item.icon }}</span>
+            <sc-if value="{{ navExpanded }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:13px;font-weight:500;flex:1;min-width:0;">{{ item.label }}</span>
+            </sc-if>
+            <sc-if value="{{ item.showBadge }}" hint-placeholder-val="{{ false }}">
+              <span style="background:var(--am-accent,#b45309);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:9px;font-family:'IBM Plex Mono',monospace;">{{ item.badge }}</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </nav>
+      <div onClick="{{ toggleNav }}" class="mlnav" style="height:42px;display:flex;align-items:center;gap:11px;padding:0 18px;border-top:1px solid #322f2a;cursor:pointer;color:#8a847a;font-size:13px;flex-shrink:0;">
+        <span>{{ navToggleIcon }}</span><sc-if value="{{ navExpanded }}" hint-placeholder-val="{{ true }}"><span>Collapse</span></sc-if>
+      </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+      <!-- TOPBAR -->
+      <header style="height:56px;background:#fff;border-bottom:1px solid #e7e3da;display:flex;align-items:center;padding:0 22px;gap:18px;position:sticky;top:0;z-index:30;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#9a948a;min-width:0;">
+          <span style="font-weight:600;color:#1a1a1a;white-space:nowrap;">{{ crumbModule }}</span>
+          <sc-if value="{{ crumbLeaf }}" hint-placeholder-val="{{ false }}"><span>/</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ crumbLeaf }}</span></sc-if>
+        </div>
+        <div style="flex:1;display:flex;justify-content:center;">
+          <div style="position:relative;width:100%;max-width:420px;">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span>
+            <input value="{{ form.globalSearch }}" name="globalSearch" onChange="{{ onInput }}" placeholder="Search customers, loans, applications…" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid #e2ddd3;border-radius:7px;background:#faf9f6;font-size:13px;outline:none;">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+          <div style="display:flex;align-items:center;gap:8px;background:#faf9f6;border:1px solid #e7e3da;border-radius:7px;padding:5px 9px;">
+            <span style="font-size:10px;color:#9a948a;text-transform:uppercase;letter-spacing:.05em;font-weight:600;">View as</span>
+            <select value="{{ role }}" onChange="{{ onRoleChange }}" style="border:none;background:transparent;font-size:12.5px;font-weight:600;color:var(--am-accent-dark,#92400e);outline:none;cursor:pointer;">
+              <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="5"><option value="{{ r.id }}">{{ r.label }}</option></sc-for>
+            </select>
+          </div>
+          <div style="position:relative;cursor:pointer;font-size:16px;color:#6f6a61;">◔</div>
+          <div onClick="{{ goProfile }}" style="display:flex;align-items:center;gap:9px;cursor:pointer;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#1f1d1a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ userInitials }}</div>
+            <div style="line-height:1.2;"><div style="font-size:12.5px;font-weight:600;">{{ userName }}</div><div style="font-size:10.5px;color:#9a948a;">{{ roleLabel }} · {{ branch }}</div></div>
+          </div>
+          <div onClick="{{ doLogout }}" title="Sign out" class="mlghost" style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#9a948a;font-size:15px;">⏻</div>
+        </div>
+      </header>
+
+      <!-- SCREENS -->
+      <main style="flex:1;overflow-y:auto;padding:24px;min-width:0;">
+        <sc-if value="{{ showDashboard }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+              <div>
+                <div style="font-size:21px;font-weight:600;letter-spacing:-0.01em;">{{ greeting }}, {{ userFirst }}</div>
+                <div style="color:#7a756c;font-size:13px;margin-top:3px;">{{ todayStr }} · {{ branch }} branch · Here's your operational snapshot.</div>
+              </div>
+              <div style="display:flex;gap:9px;">
+                <sc-for list="{{ dashActions }}" as="a" hint-placeholder-count="2">
+                  <button onClick="{{ a.go }}" class="mlbtn" style="height:38px;padding:0 15px;background:{{ a.bg }};color:{{ a.fg }};border:1px solid {{ a.bd }};border-radius:7px;font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px;">{{ a.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px;margin-bottom:18px;">
+              <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:15px 16px;">
+                  <div style="font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">{{ k.label }}</div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:23px;font-weight:600;margin-top:9px;color:#1a1a1a;">{{ k.value }}</div>
+                  <div style="font-size:11.5px;margin-top:5px;color:{{ k.deltaColor }};">{{ k.delta }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start;">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+                <div style="padding:13px 16px;border-bottom:1px solid #eee8dd;display:flex;align-items:center;justify-content:between;justify-content:space-between;">
+                  <div style="font-weight:600;font-size:14px;">{{ queueTitle }}</div>
+                  <span onClick="{{ queueGoAll }}" style="font-size:12px;color:var(--am-accent-dark,#92400e);cursor:pointer;font-weight:500;">View all →</span>
+                </div>
+                <table>
+                  <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                    <sc-for list="{{ queueCols }}" as="c" hint-placeholder-count="4"><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">{{ c }}</th></sc-for>
+                  </tr></thead>
+                  <tbody>
+                    <sc-for list="{{ queueRows }}" as="row" hint-placeholder-count="5">
+                      <tr class="mlrow" onClick="{{ row.go }}" style="border-bottom:1px solid #f3efe7;cursor:pointer;">
+                        <td style="padding:10px 16px;"><div style="font-weight:600;font-size:12.5px;">{{ row.name }}</div><div style="font-size:11px;color:#9a948a;font-family:'IBM Plex Mono',monospace;">{{ row.id }}</div></td>
+                        <td style="padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;">{{ row.amount }}</td>
+                        <td style="padding:10px 16px;font-size:12px;color:#6f6a61;">{{ row.meta }}</td>
+                        <td style="padding:10px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ row.pillFg }};background:{{ row.pillBg }};">{{ row.status }}</span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:15px 16px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Portfolio at risk (PAR)</div>
+                  <sc-for list="{{ agingBars }}" as="b" hint-placeholder-count="4">
+                    <div style="margin-bottom:11px;">
+                      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:#6f6a61;">{{ b.label }}</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;">{{ b.amount }}</span></div>
+                      <div style="height:7px;background:#f1ece2;border-radius:4px;overflow:hidden;"><div style="height:100%;width:{{ b.pct }}%;background:{{ b.color }};border-radius:4px;"></div></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:15px 16px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:11px;">Today's activity</div>
+                  <sc-for list="{{ activityFeed }}" as="f" hint-placeholder-count="4">
+                    <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #f3efe7;">
+                      <div style="width:7px;height:7px;border-radius:50%;background:{{ f.color }};margin-top:5px;flex-shrink:0;"></div>
+                      <div style="min-width:0;"><div style="font-size:12.5px;line-height:1.4;">{{ f.text }}</div><div style="font-size:11px;color:#a8a298;margin-top:1px;">{{ f.time }}</div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <!-- ===== CUSTOMERS LIST ===== -->
+        <sc-if value="{{ showCustomers }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+              <div><div style="font-size:20px;font-weight:600;">Customers</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">{{ customerCount }} borrower profiles</div></div>
+              <sc-if value="{{ canCreateCustomer }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ goNewCustomer }}" class="mlbtn" style="height:38px;padding:0 15px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">+ Register customer</button>
+              </sc-if>
+            </div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ customersTbl.q }}" onChange="{{ customersTbl.onQ }}" placeholder="Search name, ID or phone…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <select value="{{ customersTbl.status }}" onChange="{{ customersTbl.onStatus }}" style="height:34px;padding:0 10px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:13px;outline:none;"><sc-for list="{{ custStatusOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10.5px;color:#9a948a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Joined</span><input type="date" value="{{ customersTbl.from }}" onChange="{{ customersTbl.onFrom }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"><span style="font-size:11px;color:#b3ada3;">→</span><input type="date" value="{{ customersTbl.to }}" onChange="{{ customersTbl.onTo }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"></div>
+                <button onClick="{{ customersTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Customer</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Phone</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Region</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Occupation</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">KYC</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Status</th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{ customerRows }}" as="c" hint-placeholder-count="6">
+                    <tr class="mlrow" onClick="{{ c.go }}" style="border-bottom:1px solid #f3efe7;cursor:pointer;">
+                      <td style="padding:10px 16px;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:30px;height:30px;border-radius:50%;background:{{ c.photo }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;flex-shrink:0;">{{ c.initials }}</div><div><div style="font-weight:600;font-size:12.5px;">{{ c.name }}</div><div style="font-size:11px;color:#9a948a;font-family:'IBM Plex Mono',monospace;">{{ c.id }}</div></div></div></td>
+                      <td style="padding:10px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ c.phone }}</td>
+                      <td style="padding:10px 16px;font-size:12.5px;color:#6f6a61;">{{ c.region }}</td>
+                      <td style="padding:10px 16px;font-size:12.5px;color:#6f6a61;">{{ c.occupation }}</td>
+                      <td style="padding:10px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ c.kpFg }};background:{{ c.kpBg }};">{{ c.kyc }}</span></td>
+                      <td style="padding:10px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ c.spFg }};background:{{ c.spBg }};">{{ c.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ customersTbl.showing }}</div>
+                <sc-if value="{{ customersTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ customersTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ customersTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ customersTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== CUSTOMER 360 ===== -->
+        <sc-if value="{{ showCustomer }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1180px;">
+            <div style="display:flex;gap:18px;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;">
+              <div style="width:66px;height:66px;border-radius:14px;background:{{ c.photo }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:600;flex-shrink:0;">{{ cInitials }}</div>
+              <div style="flex:1;min-width:200px;">
+                <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap;"><div style="font-size:21px;font-weight:600;">{{ c.name }}</div>
+                  <span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;color:{{ cSpFg }};background:{{ cSpBg }};">{{ c.status }}</span>
+                  <span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;color:{{ cKpFg }};background:{{ cKpBg }};">KYC {{ c.kyc }}</span>
+                </div>
+                <div style="font-size:12.5px;color:#7a756c;margin-top:4px;font-family:'IBM Plex Mono',monospace;">{{ c.id }} · {{ c.phone }} · joined {{ cJoined }}</div>
+              </div>
+              <div style="display:flex;gap:9px;">
+                <button onClick="{{ cNewLoan }}" class="mlbtn" style="height:38px;padding:0 15px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">+ New loan</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px;border-bottom:1px solid #e7e3da;margin-bottom:18px;">
+              <sc-for list="{{ cTabs }}" as="t" hint-placeholder-count="4">
+                <div onClick="{{ t.go }}" style="padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer;color:{{ t.active }};border-bottom:2px solid transparent;">{{ t.label }}</div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ cTabIsOverview }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Profile details</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;">
+                    <sc-for list="{{ cFacts }}" as="f" hint-placeholder-count="10">
+                      <div><div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">{{ f.k }}</div><div style="font-size:13px;margin-top:3px;">{{ f.val }}</div></div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                  <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:16px 18px;">
+                    <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Loans & applications</div>
+                    <sc-for list="{{ cLoans }}" as="l" hint-placeholder-count="2">
+                      <div onClick="{{ l.go }}" class="mlghost" style="display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border:1px solid #eee8dd;border-radius:6px;margin-bottom:7px;cursor:pointer;">
+                        <div><div style="font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;">{{ l.id }}</div><div style="font-size:11px;color:#9a948a;">{{ l.product }}</div></div>
+                        <div style="text-align:right;"><div style="font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ l.amount }}</div><span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;color:{{ l.pFg }};background:{{ l.pBg }};margin-top:2px;">{{ l.status }}</span></div>
+                      </div>
+                    </sc-for>
+                    <sc-for list="{{ cApps }}" as="l" hint-placeholder-count="1">
+                      <div onClick="{{ l.go }}" class="mlghost" style="display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border:1px solid #eee8dd;border-radius:6px;margin-bottom:7px;cursor:pointer;">
+                        <div><div style="font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;">{{ l.id }}</div><div style="font-size:11px;color:#9a948a;">{{ l.product }} · application</div></div>
+                        <div style="text-align:right;"><div style="font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ l.amount }}</div><span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600;color:{{ l.pFg }};background:{{ l.pBg }};margin-top:2px;">{{ l.status }}</span></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cTabIsLoans }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                <div style="font-weight:600;font-size:14px;margin-bottom:8px;">Credit history</div>
+                <sc-for list="{{ cLoans }}" as="l" hint-placeholder-count="2">
+                  <div onClick="{{ l.go }}" class="mlghost" style="display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border:1px solid #eee8dd;border-radius:6px;margin-bottom:8px;cursor:pointer;"><div><div style="font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:13px;">{{ l.id }}</div><div style="font-size:11.5px;color:#9a948a;">{{ l.product }}</div></div><div style="text-align:right;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;">{{ l.amount }}</div><span style="display:inline-block;padding:1px 8px;border-radius:20px;font-size:10.5px;font-weight:600;color:{{ l.pFg }};background:{{ l.pBg }};">{{ l.status }}</span></div></div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cTabIsDocuments }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+                  <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:12px 16px;flex:1;min-width:130px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Verified</div><div style="font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:#047857;margin-top:4px;">{{ cKycCounts.v }}</div></div>
+                  <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:12px 16px;flex:1;min-width:130px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Pending</div><div style="font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--am-accent,#b45309);margin-top:4px;">{{ cKycCounts.p }}</div></div>
+                  <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:12px 16px;flex:1;min-width:130px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Rejected</div><div style="font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:#b91c1c;margin-top:4px;">{{ cKycCounts.r }}</div></div>
+                </div>
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+                  <div style="padding:12px 16px;border-bottom:1px solid #eee8dd;display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:600;font-size:14px;">Identity & supporting documents</div><button class="mlghost" style="height:32px;padding:0 12px;background:#faf9f6;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;">↑ Upload document</button></div>
+                  <sc-for list="{{ cDocs }}" as="doc" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f3efe7;">
+                      <div style="width:38px;height:38px;border-radius:7px;background:#f1ece2;display:flex;align-items:center;justify-content:center;font-size:15px;color:#92785a;flex-shrink:0;">▣</div>
+                      <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13px;">{{ doc.type }}</div><div style="font-size:11.5px;color:#9a948a;font-family:'IBM Plex Mono',monospace;">{{ doc.file }} · {{ doc.size }} · {{ doc.up }}</div></div>
+                      <span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;color:{{ doc.pFg }};background:{{ doc.pBg }};">{{ doc.status }}</span>
+                      <sc-if value="{{ doc.pending }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;gap:6px;">
+                          <button onClick="{{ doc.verify }}" class="mlbtn" style="height:30px;padding:0 11px;background:#047857;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;">Verify</button>
+                          <button onClick="{{ doc.reject }}" class="mlghost" style="height:30px;padding:0 11px;background:#fff;color:#b91c1c;border:1px solid #e7c5c5;border-radius:6px;font-size:12px;font-weight:600;">Reject</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cTabIsActivity }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Activity timeline</div>
+                <div style="font-size:13px;color:#6f6a61;line-height:1.8;">
+                  <div>● Profile created — {{ cJoined }}</div>
+                  <div>● KYC documents uploaded</div>
+                  <div>● Loan application submitted</div>
+                  <div>● Repayments recorded against active loan</div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ===== NEW CUSTOMER ===== -->
+        <sc-if value="{{ showCustomerNew }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:880px;">
+            <div style="font-size:20px;font-weight:600;margin-bottom:4px;">Register new customer</div>
+            <div style="color:#7a756c;font-size:12.5px;margin-bottom:18px;">Capture borrower KYC details. The profile starts with KYC status <strong>Pending</strong> until documents are verified.</div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:22px 24px;">
+              <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--am-accent-dark,#92400e);margin-bottom:14px;">Personal details</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Full name *</span><input name="ncName" value="{{ form.ncName }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Gender</span><select name="ncGender" value="{{ form.ncGender }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 9px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><option>Female</option><option>Male</option></select></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Date of birth</span><input name="ncDob" type="date" value="{{ form.ncDob }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">National ID (NIDA) *</span><input name="ncNida" value="{{ form.ncNida }}" onChange="{{ onInput }}" placeholder="20-digit NIDA" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Phone *</span><input name="ncPhone" value="{{ form.ncPhone }}" onChange="{{ onInput }}" placeholder="+255 7…" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Email</span><input name="ncEmail" value="{{ form.ncEmail }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+              </div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--am-accent-dark,#92400e);margin:22px 0 14px;">Location & livelihood</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Region</span><select name="ncRegion" value="{{ form.ncRegion }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 9px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><sc-for list="{{ regionOpts }}" as="r" hint-placeholder-count="4"><option>{{ r }}</option></sc-for></select></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Ward</span><input name="ncWard" value="{{ form.ncWard }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Monthly income (TZS)</span><input name="ncIncome" value="{{ form.ncIncome }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;grid-column:span 2;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Physical address</span><input name="ncAddress" value="{{ form.ncAddress }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Occupation</span><input name="ncOcc" value="{{ form.ncOcc }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;grid-column:span 3;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Business / employer</span><input name="ncBiz" value="{{ form.ncBiz }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+              </div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--am-accent-dark,#92400e);margin:22px 0 14px;">Next of kin</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Name</span><input name="ncNok" value="{{ form.ncNok }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Relationship</span><input name="ncNokRel" value="{{ form.ncNokRel }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Phone</span><input name="ncNokPhone" value="{{ form.ncNokPhone }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid #eee8dd;">
+                <button onClick="{{ saveCustomer }}" class="mlbtn" style="height:40px;padding:0 20px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Register customer</button>
+                <button onClick="{{ goCustomersBack }}" class="mlghost" style="height:40px;padding:0 18px;background:#fff;border:1px solid #d6d1c7;border-radius:7px;font-weight:500;font-size:13px;">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <!-- ===== PRODUCTS LIST ===== -->
+        <sc-if value="{{ showProducts }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+              <div><div style="font-size:20px;font-weight:600;">Loan products</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">Configurable lending products & pricing</div></div>
+              <sc-if value="{{ canConfigProducts }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ goNewProduct }}" class="mlbtn" style="height:38px;padding:0 15px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">+ New product</button>
+              </sc-if>
+            </div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ productsTbl.q }}" onChange="{{ productsTbl.onQ }}" placeholder="Search product, code or category…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <select value="{{ productsTbl.status }}" onChange="{{ productsTbl.onStatus }}" style="height:34px;padding:0 10px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:13px;outline:none;"><sc-for list="{{ prodStatusOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+                <button onClick="{{ productsTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Product</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Amount range</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Term</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Frequency</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Pricing</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Status</th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{ productRows }}" as="p" hint-placeholder-count="5">
+                    <tr class="mlrow" onClick="{{ p.go }}" style="border-bottom:1px solid #f3efe7;cursor:pointer;">
+                      <td style="padding:11px 16px;"><div style="font-weight:600;font-size:13px;">{{ p.name }}</div><div style="font-size:11px;color:#9a948a;">{{ p.category }} · {{ p.id }}</div></td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ p.minFmt }} – {{ p.maxFmt }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;">{{ p.termRange }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;color:#6f6a61;">{{ p.freq }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;">{{ p.rateFmt }} · {{ p.fee }}% fee</td>
+                      <td style="padding:11px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ p.spFg }};background:{{ p.spBg }};">{{ p.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ productsTbl.showing }}</div>
+                <sc-if value="{{ productsTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ productsTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ productsTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ productsTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== PRODUCT FORM ===== -->
+        <sc-if value="{{ showProductForm }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:860px;">
+            <div style="font-size:20px;font-weight:600;margin-bottom:4px;">{{ pTitle }}</div>
+            <div style="color:#7a756c;font-size:12.5px;margin-bottom:18px;">Define product parameters, pricing, fees and penalties. Inactive products cannot be selected on new applications.</div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:22px 24px;">
+              <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--am-accent-dark,#92400e);margin-bottom:14px;">Identity</div>
+              <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;">
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Product name</span><input name="pfName" value="{{ form.pfName }}" onChange="{{ onInput }}" placeholder="e.g. Biashara Boost" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Category</span><select name="pfCat" value="{{ form.pfCat }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 9px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><sc-for list="{{ catOpts }}" as="o" hint-placeholder-count="5"><option>{{ o }}</option></sc-for></select></label>
+              </div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--am-accent-dark,#92400e);margin:22px 0 14px;">Amount & term limits</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;">
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Min amount</span><input name="pfMin" value="{{ form.pfMin }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Max amount</span><input name="pfMax" value="{{ form.pfMax }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Min term (mo)</span><input name="pfMinT" value="{{ form.pfMinT }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Max term (mo)</span><input name="pfMaxT" value="{{ form.pfMaxT }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+              </div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--am-accent-dark,#92400e);margin:22px 0 14px;">Pricing & penalties</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Interest rate (% p.a.)</span><input name="pfRate" value="{{ form.pfRate }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Interest method</span><select name="pfMethod" value="{{ form.pfMethod }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 9px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><sc-for list="{{ methodOpts }}" as="o" hint-placeholder-count="2"><option>{{ o }}</option></sc-for></select></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Repayment frequency</span><select name="pfFreq" value="{{ form.pfFreq }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 9px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><sc-for list="{{ freqOpts }}" as="o" hint-placeholder-count="3"><option>{{ o }}</option></sc-for></select></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Processing fee (%)</span><input name="pfFee" value="{{ form.pfFee }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Penalty (% / period)</span><input name="pfPen" value="{{ form.pfPen }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Grace period (days)</span><input name="pfGrace" value="{{ form.pfGrace }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:20px;padding:11px 13px;background:#faf8f3;border:1px solid #eee8dd;border-radius:7px;">
+                <input type="checkbox" name="pfActive" checked="{{ form.pfActive }}" onChange="{{ onInput }}" style="width:16px;height:16px;accent-color:var(--am-accent,#b45309);">
+                <span style="font-size:12.5px;font-weight:500;">Active — available for new loan applications</span>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid #eee8dd;">
+                <button onClick="{{ saveProduct }}" class="mlbtn" style="height:40px;padding:0 20px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Save product</button>
+                <button onClick="{{ goProductsBack }}" class="mlghost" style="height:40px;padding:0 18px;background:#fff;border:1px solid #d6d1c7;border-radius:7px;font-weight:500;font-size:13px;">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <!-- ===== APPLICATIONS LIST ===== -->
+        <sc-if value="{{ showApplications }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+              <div><div style="font-size:20px;font-weight:600;">Loan applications</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">Origination pipeline across all statuses</div></div>
+              <sc-if value="{{ canCreateApp }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ goNewApp }}" class="mlbtn" style="height:38px;padding:0 15px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">+ New application</button>
+              </sc-if>
+            </div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ applicationsTbl.q }}" onChange="{{ applicationsTbl.onQ }}" placeholder="Search application, borrower or officer…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <select value="{{ applicationsTbl.status }}" onChange="{{ applicationsTbl.onStatus }}" style="height:34px;padding:0 10px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:13px;outline:none;"><sc-for list="{{ appStatusOpts }}" as="o" hint-placeholder-count="7"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10.5px;color:#9a948a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Created</span><input type="date" value="{{ applicationsTbl.from }}" onChange="{{ applicationsTbl.onFrom }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"><span style="font-size:11px;color:#b3ada3;">→</span><input type="date" value="{{ applicationsTbl.to }}" onChange="{{ applicationsTbl.onTo }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"></div>
+                <button onClick="{{ applicationsTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Application</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Borrower</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Product</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Amount</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Officer</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#9a948a;">Status</th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{ appRows }}" as="a" hint-placeholder-count="5">
+                    <tr class="mlrow" onClick="{{ a.go }}" style="border-bottom:1px solid #f3efe7;cursor:pointer;">
+                      <td style="padding:11px 16px;"><div style="font-weight:600;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ a.id }}</div><div style="font-size:11px;color:#9a948a;">{{ a.created }} · {{ a.term }}</div></td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-weight:500;">{{ a.name }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;color:#6f6a61;">{{ a.product }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ a.amount }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;color:#6f6a61;">{{ a.officer }}</td>
+                      <td style="padding:11px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ a.pFg }};background:{{ a.pBg }};">{{ a.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ applicationsTbl.showing }}</div>
+                <sc-if value="{{ applicationsTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ applicationsTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ applicationsTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ applicationsTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== NEW APPLICATION WIZARD ===== -->
+        <sc-if value="{{ showApplicationNew }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:980px;">
+            <div style="font-size:20px;font-weight:600;margin-bottom:16px;">New loan application</div>
+            <div style="display:flex;gap:0;margin-bottom:20px;background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:6px;">
+              <sc-for list="{{ wizSteps }}" as="s" hint-placeholder-count="4">
+                <div style="flex:1;display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:6px;background:{{ s.bg }};">
+                  <div style="width:22px;height:22px;border-radius:50%;background:{{ s.dot }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;">{{ s.n }}</div>
+                  <span style="font-size:12px;font-weight:600;color:{{ s.fg }};">{{ s.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start;">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:22px 24px;">
+                <sc-if value="{{ wizIs1 }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Borrower & product</div>
+                  <label style="display:block;margin-bottom:14px;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Select borrower *</span><select name="naCustomer" value="{{ form.naCustomer }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><option value="">— choose customer —</option><sc-for list="{{ custOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.id }}">{{ o.label }}</option></sc-for></select></label>
+                  <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Loan product *</span><select name="naProduct" value="{{ form.naProduct }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><option value="">— choose product —</option><sc-for list="{{ prodOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.id }}">{{ o.label }}</option></sc-for></select></label>
+                </sc-if>
+                <sc-if value="{{ wizIs2 }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Loan terms</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Requested amount (TZS) *</span><input name="naAmount" value="{{ form.naAmount }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                    <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Tenure (months)</span><input name="naTerm" value="{{ form.naTerm }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                  </div>
+                  <label style="display:block;margin-top:14px;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Loan purpose</span><textarea name="naPurpose" value="{{ form.naPurpose }}" onChange="{{ onInput }}" rows="3" style="width:100%;margin-top:5px;padding:9px 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;resize:vertical;"></textarea></label>
+                </sc-if>
+                <sc-if value="{{ wizIs3 }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Supporting documents</div>
+                  <div style="border:2px dashed #d6d1c7;border-radius:8px;padding:28px;text-align:center;background:#faf8f3;">
+                    <div style="font-size:26px;color:#b3ada3;">↑</div>
+                    <div style="font-size:13px;font-weight:600;margin-top:6px;">Drag files here or click to upload</div>
+                    <div style="font-size:11.5px;color:#9a948a;margin-top:3px;">NIDA, business records, collateral photos · PDF/JPG up to 10 MB</div>
+                  </div>
+                  <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px;">
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #eee8dd;border-radius:6px;"><span style="color:#92785a;">▣</span><span style="font-size:12.5px;flex:1;">nida_copy.jpg</span><span style="font-size:11px;color:#047857;font-weight:600;">Attached</span></div>
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #eee8dd;border-radius:6px;"><span style="color:#92785a;">▣</span><span style="font-size:12.5px;flex:1;">business_records.pdf</span><span style="font-size:11px;color:#047857;font-weight:600;">Attached</span></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ wizIs4 }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Review & submit</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px 20px;">
+                    <div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Borrower</div><div style="font-size:13px;margin-top:2px;">{{ naCustObj.name }}</div></div>
+                    <div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Amount</div><div style="font-size:13px;margin-top:2px;font-family:'IBM Plex Mono',monospace;">{{ naPreview.totalReq }}</div></div>
+                    <div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Est. installment</div><div style="font-size:13px;margin-top:2px;font-family:'IBM Plex Mono',monospace;">{{ naPreview.installment }}</div></div>
+                    <div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Total repayable</div><div style="font-size:13px;margin-top:2px;font-family:'IBM Plex Mono',monospace;">{{ naPreview.total }}</div></div>
+                  </div>
+                  <div style="margin-top:16px;padding:11px 13px;background:#faf8f3;border:1px solid #eee8dd;border-radius:7px;font-size:12px;color:#6f6a61;">On submit, this application enters the approval queue with status <strong style="color:#1d4ed8;">Submitted</strong>.</div>
+                </sc-if>
+
+                <div style="display:flex;gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid #eee8dd;">
+                  <sc-if value="{{ wizNotFirst }}" hint-placeholder-val="{{ false }}"><button onClick="{{ wizBack }}" class="mlghost" style="height:40px;padding:0 18px;background:#fff;border:1px solid #d6d1c7;border-radius:7px;font-weight:500;font-size:13px;">← Back</button></sc-if>
+                  <sc-if value="{{ wizNotLast }}" hint-placeholder-val="{{ true }}"><button onClick="{{ wizNext }}" class="mlbtn" style="height:40px;padding:0 20px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Continue →</button></sc-if>
+                  <sc-if value="{{ wizIs4 }}" hint-placeholder-val="{{ false }}"><button onClick="{{ submitApp }}" class="mlbtn" style="height:40px;padding:0 20px;background:#047857;color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Submit application</button></sc-if>
+                  <button onClick="{{ saveDraftApp }}" class="mlghost" style="height:40px;padding:0 16px;background:transparent;border:none;color:#6f6a61;font-weight:500;font-size:13px;margin-left:auto;">Save as draft</button>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:14px;">
+                <sc-if value="{{ naCustObj }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:15px 16px;">
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;margin-bottom:10px;">Borrower snapshot</div>
+                    <div style="font-weight:600;font-size:14px;">{{ naCustObj.name }}</div>
+                    <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:12.5px;"><span style="color:#6f6a61;">Monthly income</span><span style="font-family:'IBM Plex Mono',monospace;">{{ naCustObj.income }}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:12.5px;"><span style="color:#6f6a61;">Est. DSR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;">{{ naCustObj.dsr }}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:12.5px;"><span style="color:#6f6a61;">KYC</span><span style="font-weight:600;">{{ naCustObj.kyc }}</span></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ naProdInfo }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:15px 16px;">
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;margin-bottom:10px;">Product limits</div>
+                    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:12.5px;"><span style="color:#6f6a61;">Range</span><span style="font-family:'IBM Plex Mono',monospace;">{{ naProdInfo.range }}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:12.5px;"><span style="color:#6f6a61;">Term</span><span>{{ naProdInfo.term }}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:12.5px;"><span style="color:#6f6a61;">Interest</span><span>{{ naProdInfo.rate }}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:12.5px;"><span style="color:#6f6a61;">Fee</span><span>{{ naProdInfo.fee }}</span></div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== APPLICATION / APPROVAL DETAIL ===== -->
+        <sc-if value="{{ showApplication }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1180px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:11px;"><div style="font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;">{{ a.id }}</div><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;color:{{ aStatusFg }};background:{{ aStatusBg }};">{{ a.status }}</span></div>
+                <div style="font-size:12.5px;color:#7a756c;margin-top:4px;"><span onClick="{{ aGoCustomer }}" style="color:var(--am-accent-dark,#92400e);cursor:pointer;font-weight:500;">{{ aCust.name }}</span> · {{ aProd.name }} · created {{ aCreated }}</div>
+              </div>
+              <div style="display:flex;gap:9px;flex-wrap:wrap;">
+                <sc-if value="{{ aCanReview }}" hint-placeholder-val="{{ false }}"><button onClick="{{ aToReview }}" class="mlghost" style="height:38px;padding:0 14px;background:#fff;border:1px solid #d6d1c7;border-radius:7px;font-weight:600;font-size:13px;">Move to review</button></sc-if>
+                <sc-if value="{{ aCanDecide }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ aClarify }}" class="mlghost" style="height:38px;padding:0 14px;background:#fff;border:1px solid #d6d1c7;border-radius:7px;font-weight:600;font-size:13px;">Request clarification</button>
+                  <button onClick="{{ aReject }}" class="mlbtn" style="height:38px;padding:0 16px;background:#fff;color:#b91c1c;border:1px solid #e7c5c5;border-radius:7px;font-weight:600;font-size:13px;">Reject</button>
+                  <button onClick="{{ aApprove }}" class="mlbtn" style="height:38px;padding:0 18px;background:#047857;color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Approve</button>
+                </sc-if>
+                <sc-if value="{{ aIsApproved }}" hint-placeholder-val="{{ false }}"><button onClick="{{ aGoDisburse }}" class="mlbtn" style="height:38px;padding:0 18px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Proceed to disbursement →</button></sc-if>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start;">
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Application details</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px 24px;">
+                    <sc-for list="{{ aFacts }}" as="f" hint-placeholder-count="7"><div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">{{ f.k }}</div><div style="font-size:13px;margin-top:2px;">{{ f.val }}</div></div></sc-for>
+                  </div>
+                </div>
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+                  <div style="padding:13px 16px;border-bottom:1px solid #eee8dd;font-weight:600;font-size:14px;">Proposed repayment schedule <span style="font-weight:400;color:#9a948a;font-size:12px;">(first 6 of schedule)</span></div>
+                  <table>
+                    <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;"><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">#</th><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Due</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Principal</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Interest</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Installment</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ aSchedule }}" as="r" hint-placeholder-count="6"><tr style="border-bottom:1px solid #f3efe7;"><td style="padding:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ r.n }}</td><td style="padding:8px 16px;font-size:12px;">{{ r.due }}</td><td style="padding:8px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ r.principal }}</td><td style="padding:8px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ r.interest }}</td><td style="padding:8px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;">{{ r.total }}</td></tr></sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Assessor findings</div>
+                  <textarea name="assessNote" value="{{ form.assessNote }}" onChange="{{ onInput }}" rows="3" placeholder="Record affordability assessment, collateral notes, recommendation…" style="width:100%;padding:9px 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;resize:vertical;"></textarea>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:16px 18px;">
+                  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;margin-bottom:11px;">Affordability</div>
+                  <div style="display:flex;align-items:baseline;gap:7px;"><div style="font-size:30px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:{{ aDsrColor }};">{{ aDsr }}%</div><div style="font-size:12px;color:#9a948a;">debt-service ratio</div></div>
+                  <div style="display:flex;justify-content:space-between;margin-top:13px;font-size:12.5px;"><span style="color:#6f6a61;">Est. installment</span><span style="font-family:'IBM Plex Mono',monospace;">{{ aInstallment }}</span></div>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12.5px;"><span style="color:#6f6a61;">Total repayable</span><span style="font-family:'IBM Plex Mono',monospace;">{{ aTotalRepay }}</span></div>
+                </div>
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:16px 18px;">
+                  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;margin-bottom:13px;">Audit trail</div>
+                  <sc-for list="{{ aTrail }}" as="t" hint-placeholder-count="3">
+                    <div style="display:flex;gap:11px;padding-bottom:13px;">
+                      <div style="display:flex;flex-direction:column;align-items:center;"><div style="width:8px;height:8px;border-radius:50%;background:var(--am-accent,#b45309);margin-top:4px;"></div><div style="flex:1;width:1px;background:#eee8dd;margin-top:3px;"></div></div>
+                      <div style="min-width:0;"><div style="font-size:12.5px;font-weight:600;">{{ t.action }}</div><div style="font-size:11.5px;color:#6f6a61;margin-top:1px;">{{ t.detail }}</div><div style="font-size:11px;color:#a8a298;margin-top:2px;">{{ t.actor }} · {{ t.role }} · {{ t.time }}</div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <!-- ===== APPROVALS QUEUE ===== -->
+        <sc-if value="{{ showApprovals }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="margin-bottom:18px;"><div style="font-size:20px;font-weight:600;">Assessment & approval</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">Applications awaiting your decision</div></div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ approvalsTbl.q }}" onChange="{{ approvalsTbl.onQ }}" placeholder="Search application, borrower or officer…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <select value="{{ approvalsTbl.status }}" onChange="{{ approvalsTbl.onStatus }}" style="height:34px;padding:0 10px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:13px;outline:none;"><sc-for list="{{ apprStatusOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10.5px;color:#9a948a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Created</span><input type="date" value="{{ approvalsTbl.from }}" onChange="{{ approvalsTbl.onFrom }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"><span style="font-size:11px;color:#b3ada3;">→</span><input type="date" value="{{ approvalsTbl.to }}" onChange="{{ approvalsTbl.onTo }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"></div>
+                <button onClick="{{ approvalsTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Application</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Borrower</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Amount</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">DSR</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Officer</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Status</th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{ approvalRows }}" as="a" hint-placeholder-count="3">
+                    <tr class="mlrow" onClick="{{ a.go }}" style="border-bottom:1px solid #f3efe7;cursor:pointer;">
+                      <td style="padding:11px 16px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;">{{ a.id }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-weight:500;">{{ a.name }}<div style="font-size:11px;color:#9a948a;font-weight:400;">{{ a.product }}</div></td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ a.amount }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;font-weight:600;color:{{ a.dsrColor }};">{{ a.dsr }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;color:#6f6a61;">{{ a.officer }}</td>
+                      <td style="padding:11px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ a.pFg }};background:{{ a.pBg }};">{{ a.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ approvalsTbl.showing }}</div>
+                <sc-if value="{{ approvalsTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ approvalsTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ approvalsTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ approvalsTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== DISBURSEMENTS LIST ===== -->
+        <sc-if value="{{ showDisbursements }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="margin-bottom:18px;"><div style="font-size:20px;font-weight:600;">Disbursements</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">Approved loans ready for disbursement</div></div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ disbursementsTbl.q }}" onChange="{{ disbursementsTbl.onQ }}" placeholder="Search application or borrower…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10.5px;color:#9a948a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Approved</span><input type="date" value="{{ disbursementsTbl.from }}" onChange="{{ disbursementsTbl.onFrom }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"><span style="font-size:11px;color:#b3ada3;">→</span><input type="date" value="{{ disbursementsTbl.to }}" onChange="{{ disbursementsTbl.onTo }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"></div>
+                <button onClick="{{ disbursementsTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Application</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Borrower</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Product</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Amount</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Status</th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{ disbRows }}" as="a" hint-placeholder-count="2">
+                    <tr class="mlrow" onClick="{{ a.go }}" style="border-bottom:1px solid #f3efe7;cursor:pointer;">
+                      <td style="padding:11px 16px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;">{{ a.id }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-weight:500;">{{ a.name }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;color:#6f6a61;">{{ a.product }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ a.amount }}</td>
+                      <td style="padding:11px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ a.pFg }};background:{{ a.pBg }};">{{ a.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ disbursementsTbl.showing }}</div>
+                <sc-if value="{{ disbursementsTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ disbursementsTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ disbursementsTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ disbursementsTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== DISBURSEMENT DETAIL ===== -->
+        <sc-if value="{{ showDisbursement }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1020px;">
+            <div style="margin-bottom:16px;"><div style="font-size:20px;font-weight:600;">Loan contract & disbursement</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">{{ da.id }} · {{ dCust.name }}</div></div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;">
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Approved loan summary</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div style="padding:12px 14px;background:#faf8f3;border-radius:7px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Principal</div><div style="font-size:18px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-top:3px;">{{ dAmount }}</div></div>
+                    <div style="padding:12px 14px;background:#faf8f3;border-radius:7px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Net to disburse</div><div style="font-size:18px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-top:3px;color:#047857;">{{ dNet }}</div></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:12.5px;"><span style="color:#6f6a61;">Processing fee deducted</span><span style="font-family:'IBM Plex Mono',monospace;">{{ dFee }}</span></div>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12.5px;"><span style="color:#6f6a61;">Tenure</span><span>{{ dTerm }} months</span></div>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12.5px;"><span style="color:#6f6a61;">Monthly installment</span><span style="font-family:'IBM Plex Mono',monospace;">{{ dInstallment }}</span></div>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12.5px;"><span style="color:#6f6a61;">First / last due</span><span>{{ dFirstDue }} → {{ dLastDue }}</span></div>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12.5px;"><span style="color:#6f6a61;">Total repayable</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;">{{ dTotal }}</span></div>
+                </div>
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Loan agreement</div>
+                  <div style="border:1px solid #eee8dd;border-radius:7px;padding:13px 15px;background:#faf8f3;font-size:12px;color:#6f6a61;line-height:1.6;max-height:120px;overflow-y:auto;">This Loan Agreement is made between Malta Microfinance Ltd ("Lender") and the Borrower named above. The Borrower agrees to repay the principal together with interest at the stated rate, in accordance with the repayment schedule. Late payments attract penalty charges as per the product terms. The Lender reserves the right to recover outstanding amounts through collateral and guarantors…</div>
+                  <div style="display:flex;align-items:center;gap:9px;margin-top:13px;"><input type="checkbox" name="disAccepted" checked="{{ form.disAccepted }}" onChange="{{ onInput }}" style="width:16px;height:16px;accent-color:var(--am-accent,#b45309);"><span style="font-size:12.5px;font-weight:500;">Borrower has reviewed and accepted the agreement terms</span></div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border:1px dashed #d6d1c7;border-radius:7px;"><span style="color:#92785a;">▣</span><span style="font-size:12.5px;flex:1;">signed_agreement.pdf</span><span style="font-size:11px;color:#047857;font-weight:600;">Uploaded</span></div>
+                </div>
+              </div>
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Execute disbursement</div>
+                <label style="display:block;margin-bottom:14px;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Disbursement channel</span><select name="disChannel" value="{{ form.disChannel }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><option value="">— select channel —</option><sc-for list="{{ channelOpts }}" as="o" hint-placeholder-count="6"><option>{{ o }}</option></sc-for></select></label>
+                <label style="display:block;margin-bottom:14px;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Recipient account / number</span><input name="disAccount" value="{{ form.disAccount }}" onChange="{{ onInput }}" placeholder="+255 7… or bank account" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                <sc-if value="{{ dCanDisburse }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ dDisburse }}" class="mlbtn" style="width:100%;height:42px;background:#047857;color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13.5px;">Disburse {{ dNet }}</button>
+                </sc-if>
+                <sc-if value="{{ dCannotDisburse }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:11px 13px;background:#faf8f3;border:1px solid #eee8dd;border-radius:7px;font-size:12px;color:#9a948a;text-align:center;">Disbursement requires Operations or Manager role.</div>
+                </sc-if>
+                <div style="margin-top:13px;font-size:11.5px;color:#9a948a;line-height:1.5;">On execution the status moves <strong>Pending Disbursement → Disbursed</strong> and a loan account is opened with its repayment schedule.</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <!-- ===== ACCOUNTS LIST ===== -->
+        <sc-if value="{{ showAccounts }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="margin-bottom:18px;"><div style="font-size:20px;font-weight:600;">Loan accounts</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">All disbursed loans and their lifecycle status</div></div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ accountsTbl.q }}" onChange="{{ accountsTbl.onQ }}" placeholder="Search account or borrower…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <select value="{{ accountsTbl.status }}" onChange="{{ accountsTbl.onStatus }}" style="height:34px;padding:0 10px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:13px;outline:none;"><sc-for list="{{ acctStatusOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10.5px;color:#9a948a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Disbursed</span><input type="date" value="{{ accountsTbl.from }}" onChange="{{ accountsTbl.onFrom }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"><span style="font-size:11px;color:#b3ada3;">→</span><input type="date" value="{{ accountsTbl.to }}" onChange="{{ accountsTbl.onTo }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"></div>
+                <button onClick="{{ accountsTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Account</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Borrower</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Principal</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Outstanding</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Next due</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Status</th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{ accountRows }}" as="l" hint-placeholder-count="4">
+                    <tr class="mlrow" onClick="{{ l.go }}" style="border-bottom:1px solid #f3efe7;cursor:pointer;">
+                      <td style="padding:11px 16px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;">{{ l.id }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-weight:500;">{{ l.name }}<div style="font-size:11px;color:#9a948a;font-weight:400;">{{ l.product }}</div></td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ l.principal }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;font-weight:600;">{{ l.outstanding }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;">{{ l.next }}</td>
+                      <td style="padding:11px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ l.pFg }};background:{{ l.pBg }};">{{ l.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ accountsTbl.showing }}</div>
+                <sc-if value="{{ accountsTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ accountsTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ accountsTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ accountsTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== ACCOUNT 360 ===== -->
+        <sc-if value="{{ showAccount }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1180px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:11px;"><div style="font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;">{{ l.id }}</div><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;color:{{ lStatusFg }};background:{{ lStatusBg }};">{{ l.status }}</span></div>
+                <div style="font-size:12.5px;color:#7a756c;margin-top:4px;">{{ lCust.name }} · {{ lProd.name }}</div>
+              </div>
+              <sc-if value="{{ canReceive }}" hint-placeholder-val="{{ true }}"><button onClick="{{ lReceive }}" class="mlbtn" style="height:38px;padding:0 16px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Receive payment</button></sc-if>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:16px;">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:14px 16px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Principal</div><div style="font-size:17px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-top:5px;">{{ lPrincipal }}</div></div>
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:14px 16px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Repaid</div><div style="font-size:17px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-top:5px;color:#047857;">{{ lPaid }}</div></div>
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:14px 16px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Outstanding</div><div style="font-size:17px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-top:5px;">{{ lOutstanding }}</div></div>
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:14px 16px;"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Progress</div><div style="font-size:17px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-top:5px;">{{ lProgress }}%</div></div>
+            </div>
+            <div style="display:flex;gap:4px;border-bottom:1px solid #e7e3da;margin-bottom:16px;">
+              <sc-for list="{{ lTabs }}" as="t" hint-placeholder-count="4"><div onClick="{{ t.go }}" style="padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer;color:{{ t.color }};">{{ t.label }}</div></sc-for>
+            </div>
+            <sc-if value="{{ lTabIsSchedule }}" hint-placeholder-val="{{ true }}">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+                <table>
+                  <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;"><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">#</th><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Due date</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Principal</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Interest</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Installment</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Balance</th><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Status</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ lSchedule }}" as="r" hint-placeholder-count="9"><tr style="border-bottom:1px solid #f3efe7;"><td style="padding:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ r.n }}</td><td style="padding:8px 16px;font-size:12px;">{{ r.due }}</td><td style="padding:8px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ r.principal }}</td><td style="padding:8px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ r.interest }}</td><td style="padding:8px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;">{{ r.total }}</td><td style="padding:8px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#9a948a;">{{ r.balance }}</td><td style="padding:8px 16px;"><span style="display:inline-block;padding:1px 8px;border-radius:20px;font-size:10.5px;font-weight:600;color:{{ r.pFg }};background:{{ r.pBg }};">{{ r.status }}</span></td></tr></sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </sc-if>
+            <sc-if value="{{ lTabIsTransactions }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+                <table>
+                  <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;"><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Date</th><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Receipt</th><th style="text-align:left;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Method</th><th style="text-align:right;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Amount</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ lTxns }}" as="t" hint-placeholder-count="3"><tr style="border-bottom:1px solid #f3efe7;"><td style="padding:9px 16px;font-size:12.5px;">{{ t.date }}</td><td style="padding:9px 16px;font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ t.ref }}</td><td style="padding:9px 16px;font-size:12.5px;color:#6f6a61;">{{ t.method }}</td><td style="padding:9px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:#047857;">{{ t.amount }}</td></tr></sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </sc-if>
+            <sc-if value="{{ lTabIsCharges }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Accrued charges & penalties</div>
+                <sc-for list="{{ lCharges }}" as="ch" hint-placeholder-count="1"><div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3efe7;"><div><div style="font-size:13px;font-weight:500;">{{ ch.type }}</div><div style="font-size:11.5px;color:#9a948a;">{{ ch.date }}</div></div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#b91c1c;">{{ ch.amount }}</div></div></sc-for>
+                <sc-if value="{{ lNoCharges }}" hint-placeholder-val="{{ true }}"><div style="font-size:12.5px;color:#9a948a;padding:8px 0;">No penalties or additional charges accrued.</div></sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ lTabIsNotes }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Account notes</div>
+                <textarea name="acctNote" value="{{ form.acctNote }}" onChange="{{ onInput }}" rows="3" placeholder="Add a collection note, restructuring note, or follow-up…" style="width:100%;padding:9px 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;resize:vertical;"></textarea>
+                <button class="mlbtn" style="margin-top:10px;height:34px;padding:0 14px;background:#1f1d1a;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:12.5px;">Add note</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- ===== COLLECTIONS ===== -->
+        <sc-if value="{{ showCollections }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="margin-bottom:18px;"><div style="font-size:20px;font-weight:600;">Collections & delinquency</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">Due & overdue installments by aging bucket</div></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px;">
+              <sc-for list="{{ colBuckets }}" as="b" hint-placeholder-count="5">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:13px 15px;border-top:3px solid {{ b.color }};">
+                  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#9a948a;">{{ b.label }}</div>
+                  <div style="font-size:17px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-top:6px;">{{ b.amount }}</div>
+                  <div style="font-size:11.5px;color:#6f6a61;margin-top:2px;">{{ b.count }} accounts</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="padding:12px 16px;border-bottom:1px solid #eee8dd;font-weight:600;font-size:14px;">Repayment worklist</div>
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ collectionsTbl.q }}" onChange="{{ collectionsTbl.onQ }}" placeholder="Search account, borrower or phone…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <select value="{{ collectionsTbl.status }}" onChange="{{ collectionsTbl.onStatus }}" style="height:34px;padding:0 10px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:13px;outline:none;"><sc-for list="{{ colBucketOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+                <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:10.5px;color:#9a948a;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Due</span><input type="date" value="{{ collectionsTbl.from }}" onChange="{{ collectionsTbl.onFrom }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"><span style="font-size:11px;color:#b3ada3;">→</span><input type="date" value="{{ collectionsTbl.to }}" onChange="{{ collectionsTbl.onTo }}" style="height:34px;padding:0 8px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:12px;outline:none;font-family:'IBM Plex Mono',monospace;"></div>
+                <button onClick="{{ collectionsTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;"><th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Account</th><th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Borrower</th><th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Due</th><th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Amount</th><th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Bucket</th><th style="text-align:right;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Action</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ collectionRows }}" as="r" hint-placeholder-count="3">
+                    <tr style="border-bottom:1px solid #f3efe7;">
+                      <td style="padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;">{{ r.id }}</td>
+                      <td style="padding:10px 16px;font-size:12.5px;font-weight:500;">{{ r.name }}<div style="font-size:11px;color:#9a948a;font-weight:400;font-family:'IBM Plex Mono',monospace;">{{ r.phone }}</div></td>
+                      <td style="padding:10px 16px;font-size:12.5px;">{{ r.due }}</td>
+                      <td style="padding:10px 16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;">{{ r.amount }}</td>
+                      <td style="padding:10px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ r.pFg }};background:{{ r.pBg }};">{{ r.bucket }}</span></td>
+                      <td style="padding:10px 16px;text-align:right;"><div style="display:inline-flex;gap:6px;"><button onClick="{{ r.ptp }}" class="mlghost" style="height:30px;padding:0 11px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12px;font-weight:500;">Promise-to-pay</button><sc-if value="{{ r.canPay }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.pay }}" class="mlbtn" style="height:30px;padding:0 12px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;">Receive</button></sc-if></div></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ collectionsTbl.showing }}</div>
+                <sc-if value="{{ collectionsTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ collectionsTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ collectionsTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ collectionsTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== RECEIVE PAYMENT ===== -->
+        <sc-if value="{{ showReceivePayment }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:880px;">
+            <div style="margin-bottom:16px;"><div style="font-size:20px;font-weight:600;">Receive payment</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">{{ pl.id }} · {{ pCust.name }}</div></div>
+            <sc-if value="{{ payNotDone }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;">
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:20px 22px;">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:14px;">Payment details</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Amount received (TZS) *</span><input name="payAmount" value="{{ form.payAmount }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                    <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Payment method</span><select name="payMethod" value="{{ form.payMethod }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><sc-for list="{{ payMethodOpts }}" as="o" hint-placeholder-count="5"><option>{{ o }}</option></sc-for></select></label>
+                    <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Reference / txn ID</span><input name="payRef" value="{{ form.payRef }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;font-family:'IBM Plex Mono',monospace;"></label>
+                    <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Allocation</span><select name="payAlloc" value="{{ form.payAlloc }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:40px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><option>Oldest installment first</option><option>Specific installment</option><option>Penalties first</option></select></label>
+                  </div>
+                  <button onClick="{{ pTake }}" class="mlbtn" style="width:100%;margin-top:18px;height:42px;background:#047857;color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13.5px;">Record payment & issue receipt</button>
+                </div>
+                <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:18px 20px;">
+                  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;margin-bottom:12px;">Installment #{{ pInstallment }}</div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:7px;"><span style="color:#6f6a61;">Due date</span><span>{{ pDueDate }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:7px;"><span style="color:#6f6a61;">Installment due</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;">{{ pDue }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;padding-top:9px;border-top:1px solid #eee8dd;"><span style="color:#6f6a61;">Total outstanding</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;">{{ pOut }}</span></div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ payDone }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:30px;max-width:420px;text-align:center;animation:fadeUp .3s ease;">
+                <div style="width:52px;height:52px;border-radius:50%;background:#e3f3eb;color:#047857;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto;">✓</div>
+                <div style="font-size:17px;font-weight:600;margin-top:14px;">Payment recorded</div>
+                <div style="font-size:12.5px;color:#7a756c;margin-top:4px;">Receipt <span style="font-family:'IBM Plex Mono',monospace;">{{ pReceiptNo }}</span> issued</div>
+                <div style="margin-top:18px;display:flex;gap:9px;justify-content:center;"><button class="mlghost" style="height:38px;padding:0 16px;background:#fff;border:1px solid #d6d1c7;border-radius:7px;font-weight:600;font-size:13px;">↓ Print receipt</button><button onClick="{{ pGoAccount }}" class="mlbtn" style="height:38px;padding:0 16px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">View account</button></div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+        <!-- ===== USERS LIST ===== -->
+        <sc-if value="{{ showUsers }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:1340px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+              <div><div style="font-size:20px;font-weight:600;">User management</div><div style="color:#7a756c;font-size:12.5px;margin-top:2px;">Staff accounts, roles & access</div></div>
+              <button onClick="{{ goNewUser }}" class="mlbtn" style="height:38px;padding:0 15px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">+ New user</button>
+            </div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;overflow:hidden;">
+              <div style="display:flex;gap:9px;padding:12px 14px;border-bottom:1px solid #eee8dd;align-items:center;flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:190px;max-width:300px;"><span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#b3ada3;font-size:13px;">⌕</span><input value="{{ usersTbl.q }}" onChange="{{ usersTbl.onQ }}" placeholder="Search name, email or branch…" style="width:100%;height:34px;padding:0 12px 0 30px;border:1px solid #e2ddd3;border-radius:6px;background:#faf9f6;font-size:13px;outline:none;"></div>
+                <select value="{{ usersTbl.status }}" onChange="{{ usersTbl.onStatus }}" style="height:34px;padding:0 10px;border:1px solid #e2ddd3;border-radius:6px;background:#fff;font-size:13px;outline:none;"><sc-for list="{{ userStatusOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+                <button onClick="{{ usersTbl.clear }}" class="mlghost" style="height:34px;padding:0 12px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12.5px;font-weight:500;color:#6f6a61;">Clear</button>
+              </div>
+              <table>
+                <thead><tr style="background:#faf8f3;border-bottom:1px solid #eee8dd;">
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">User</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Role</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Branch</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Last active</th>
+                  <th style="text-align:left;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Status</th>
+                  <th style="text-align:right;padding:9px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;color:#9a948a;">Actions</th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{ userRows }}" as="u" hint-placeholder-count="6">
+                    <tr style="border-bottom:1px solid #f3efe7;">
+                      <td style="padding:11px 16px;font-size:12.5px;font-weight:600;">{{ u.name }}<div style="font-size:11px;color:#9a948a;font-weight:400;font-family:'IBM Plex Mono',monospace;">{{ u.email }}</div></td>
+                      <td style="padding:11px 16px;font-size:12.5px;">{{ u.roleLabel }}</td>
+                      <td style="padding:11px 16px;font-size:12.5px;color:#6f6a61;">{{ u.branch }}</td>
+                      <td style="padding:11px 16px;font-size:12px;color:#6f6a61;font-family:'IBM Plex Mono',monospace;">{{ u.last }}</td>
+                      <td style="padding:11px 16px;"><span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;color:{{ u.pFg }};background:{{ u.pBg }};">{{ u.status }}</span></td>
+                      <td style="padding:11px 16px;text-align:right;"><div style="display:inline-flex;gap:6px;"><button onClick="{{ u.edit }}" class="mlghost" style="height:30px;padding:0 11px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12px;font-weight:500;">Edit</button><button onClick="{{ u.toggle }}" class="mlghost" style="height:30px;padding:0 11px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:12px;font-weight:500;">{{ u.toggleLabel }}</button></div></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eee8dd;flex-wrap:wrap;gap:8px;">
+                <div style="font-size:12px;color:#9a948a;">Showing {{ usersTbl.showing }}</div>
+                <sc-if value="{{ usersTbl.multiPage }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;align-items:center;"><button onClick="{{ usersTbl.prev }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">‹</button><sc-for list="{{ usersTbl.pages }}" as="pg" hint-placeholder-count="3"><button onClick="{{ pg.go }}" style="height:30px;min-width:30px;padding:0 9px;background:{{ pg.bg }};color:{{ pg.fg }};border:1px solid {{ pg.bd }};border-radius:6px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',monospace;cursor:pointer;">{{ pg.n }}</button></sc-for><button onClick="{{ usersTbl.next }}" class="mlghost" style="height:30px;min-width:30px;padding:0 9px;background:#fff;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;color:#6f6a61;">›</button></div></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== USER FORM ===== -->
+        <sc-if value="{{ showUserForm }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:720px;">
+            <div style="font-size:20px;font-weight:600;margin-bottom:4px;">{{ uTitle }}</div>
+            <div style="color:#7a756c;font-size:12.5px;margin-bottom:18px;">Assign a role to control which modules and actions this user can access.</div>
+            <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:22px 24px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Full name</span><input name="uName" value="{{ form.uName }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Work email</span><input name="uEmail" value="{{ form.uEmail }}" onChange="{{ onInput }}" placeholder="name@maltamfi.co.tz" style="width:100%;margin-top:5px;height:38px;padding:0 11px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;"></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Role</span><select name="uRole" value="{{ form.uRole }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 9px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><sc-for list="{{ roleFormOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.id }}">{{ o.label }}</option></sc-for></select></label>
+                <label style="display:block;"><span style="font-size:11.5px;font-weight:600;color:#6f6a61;">Branch</span><select name="uBranch" value="{{ form.uBranch }}" onChange="{{ onInput }}" style="width:100%;margin-top:5px;height:38px;padding:0 9px;border:1px solid #d6d1c7;border-radius:6px;font-size:13px;outline:none;background:#fff;"><sc-for list="{{ branchOpts }}" as="o" hint-placeholder-count="6"><option>{{ o }}</option></sc-for></select></label>
+              </div>
+              <div style="margin-top:16px;padding:12px 14px;background:#faf8f3;border:1px solid #eee8dd;border-radius:7px;font-size:12px;color:#6f6a61;line-height:1.5;">A temporary password and activation link will be emailed. The account starts <strong>Active</strong> and can be deactivated at any time.</div>
+              <div style="display:flex;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid #eee8dd;">
+                <button onClick="{{ saveUser }}" class="mlbtn" style="height:40px;padding:0 20px;background:var(--am-accent,#b45309);color:#fff;border:none;border-radius:7px;font-weight:600;font-size:13px;">Save user</button>
+                <button onClick="{{ goUsersBack }}" class="mlghost" style="height:40px;padding:0 18px;background:#fff;border:1px solid #d6d1c7;border-radius:7px;font-weight:500;font-size:13px;">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== PROFILE ===== -->
+        <sc-if value="{{ showProfile }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:fadeUp .25s ease;max-width:760px;">
+            <div style="font-size:20px;font-weight:600;margin-bottom:18px;">My profile</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:20px 22px;">
+                <div style="display:flex;align-items:center;gap:14px;"><div style="width:54px;height:54px;border-radius:13px;background:#1f1d1a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;">{{ userInitials }}</div><div><div style="font-size:16px;font-weight:600;">{{ profName }}</div><div style="font-size:12.5px;color:#7a756c;">{{ profRole }} · {{ profBranch }}</div></div></div>
+                <div style="margin-top:18px;display:flex;flex-direction:column;gap:11px;">
+                  <div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Email</div><div style="font-size:13px;margin-top:2px;font-family:'IBM Plex Mono',monospace;">{{ profEmail }}</div></div>
+                  <div><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9a948a;font-weight:600;">Role</div><div style="font-size:13px;margin-top:2px;">{{ profRole }}</div></div>
+                </div>
+                <button onClick="{{ doLogout }}" class="mlghost" style="margin-top:20px;height:38px;width:100%;background:#fff;border:1px solid #e7c5c5;color:#b91c1c;border-radius:7px;font-weight:600;font-size:13px;">Sign out</button>
+              </div>
+              <div style="background:#fff;border:1px solid #e7e3da;border-radius:8px;padding:20px 22px;">
+                <div style="font-weight:600;font-size:14px;margin-bottom:12px;">Module access</div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <sc-for list="{{ profPerms }}" as="p" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:9px;font-size:12.5px;"><span style="color:#047857;">✓</span>{{ p }}</div></sc-for>
+                </div>
+                <div style="margin-top:18px;font-weight:600;font-size:14px;margin-bottom:10px;">Security</div>
+                <button class="mlghost" style="height:36px;width:100%;background:#faf9f6;border:1px solid #d6d1c7;border-radius:7px;font-weight:500;font-size:12.5px;">Change password</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <!-- @screens -->
+      </main>
+    </div>
+  </div>
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1f1d1a;color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:100;animation:fadeUp .25s ease;display:flex;align-items:center;gap:9px;">
+      <span style="color:#e8a04f;">●</span>{{ toast }}
+    </div>
+  </sc-if>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:820},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Amber&quot;,&quot;Indigo&quot;,&quot;Teal&quot;,&quot;Rose&quot;],&quot;default&quot;:&quot;Amber&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;,&quot;label&quot;:&quot;Brand accent&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Compact&quot;,&quot;Comfortable&quot;,&quot;Spacious&quot;],&quot;default&quot;:&quot;Comfortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;,&quot;label&quot;:&quot;Table density&quot;},&quot;sidebarTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Midnight&quot;,&quot;Espresso&quot;,&quot;Forest&quot;,&quot;Graphite&quot;],&quot;default&quot;:&quot;Midnight&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;,&quot;label&quot;:&quot;Sidebar tone&quot;}}">
+class Component extends DCLogic {
+  state = {
+    authed: false,
+    role: 'officer',
+    page: 'dashboard',
+    params: {},
+    navCollapsed: false,
+    form: { username: 'amina.officer', password: '', loginView: 'login', resetEmail: '', globalSearch: '' },
+    resetSent: false,
+    loginError: '',
+    wizardStep: 1,
+    toast: null,
+    tf: {},
+    data: Component.seed(),
+  };
+
+  // ---------- SEED DATA ----------
+  static seed() {
+    const customers = [
+      { id:'CUS-1001', name:'Amina Hassan Mwinyi', gender:'Female', dob:'1989-03-12', phone:'+255 712 884 220', email:'amina.h@gmail.com', nida:'19890312-14101-00012-23', region:'Dar es Salaam', ward:'Kinondoni', address:'Plot 24, Mwenge, Kinondoni', occupation:'Retail trader — kitenge & fabrics', business:'Amina Fabrics, Kariakoo', monthlyIncome:1850000, nokName:'Hassan Mwinyi', nokRelation:'Spouse', nokPhone:'+255 754 110 922', status:'Active', kyc:'Verified', joined:'2024-08-14', photo:'#caa472' },
+      { id:'CUS-1002', name:'Juma Said Mwakalinga', gender:'Male', dob:'1985-11-02', phone:'+255 754 221 765', email:'juma.mwk@gmail.com', nida:'19851102-20203-00045-11', region:'Mwanza', ward:'Nyamagana', address:'Buzuruga Rd, Nyamagana', occupation:'Boda-boda operator & spares', business:'JM Spares', monthlyIncome:1200000, nokName:'Rehema Said', nokRelation:'Sister', nokPhone:'+255 715 330 118', status:'Active', kyc:'Verified', joined:'2024-09-03', photo:'#7d9b8a' },
+      { id:'CUS-1003', name:'Neema Elia Kessy', gender:'Female', dob:'1992-06-21', phone:'+255 689 442 100', email:'neema.kessy@gmail.com', nida:'19920621-13301-00078-04', region:'Arusha', ward:'Themi', address:'Sekei, Arusha', occupation:'Salon owner', business:'Neema Beauty Lounge', monthlyIncome:2100000, nokName:'Elia Kessy', nokRelation:'Father', nokPhone:'+255 786 220 451', status:'Active', kyc:'Pending', joined:'2026-05-28', photo:'#b48a9c' },
+      { id:'CUS-1004', name:'Baraka Joseph Mlay', gender:'Male', dob:'1990-01-18', phone:'+255 765 998 003', email:'baraka.mlay@gmail.com', nida:'19900118-11102-00031-07', region:'Kilimanjaro', ward:'Moshi Urban', address:'Kiusa St, Moshi', occupation:'Coffee farmer', business:'Mlay Family Farm', monthlyIncome:1650000, nokName:'Grace Mlay', nokRelation:'Spouse', nokPhone:'+255 753 661 220', status:'Active', kyc:'Verified', joined:'2025-02-11', photo:'#9a8b6f' },
+      { id:'CUS-1005', name:'Zainabu Omary Kihwelo', gender:'Female', dob:'1994-09-30', phone:'+255 719 005 661', email:'zainabu.k@gmail.com', nida:'19940930-15401-00099-12', region:'Dodoma', ward:'Makole', address:'Area C, Dodoma', occupation:'Mobile money agent', business:'Zee Vodacom Agent', monthlyIncome:980000, nokName:'Omary Kihwelo', nokRelation:'Father', nokPhone:'+255 742 880 117', status:'Inactive', kyc:'Rejected', joined:'2026-01-19', photo:'#a89070' },
+      { id:'CUS-1006', name:'Frank Peter Mushi', gender:'Male', dob:'1987-04-25', phone:'+255 786 334 552', email:'frank.mushi@gmail.com', nida:'19870425-12201-00056-09', region:'Dar es Salaam', ward:'Ilala', address:'Buguruni, Ilala', occupation:'Hardware shop owner', business:'Mushi Hardware', monthlyIncome:2750000, nokName:'Lucy Mushi', nokRelation:'Spouse', nokPhone:'+255 713 442 889', status:'Active', kyc:'Verified', joined:'2024-11-22', photo:'#8c9bad' },
+    ];
+    const products = [
+      { id:'PRD-01', name:'Biashara Boost', category:'Business / SME', min:200000, max:5000000, minTerm:3, maxTerm:12, freq:'Monthly', rate:18, method:'Flat', fee:2.5, penalty:0.5, grace:3, status:'Active', desc:'Working-capital loan for micro & small traders.' },
+      { id:'PRD-02', name:'Kilimo Loan', category:'Agriculture', min:300000, max:8000000, minTerm:4, maxTerm:18, freq:'Monthly', rate:16, method:'Reducing balance', fee:2.0, penalty:0.5, grace:7, status:'Active', desc:'Seasonal financing for smallholder farmers.' },
+      { id:'PRD-03', name:'Salary Advance', category:'Consumer', min:100000, max:3000000, minTerm:1, maxTerm:6, freq:'Monthly', rate:12, method:'Flat', fee:1.5, penalty:1.0, grace:0, status:'Active', desc:'Short-term advance for salaried employees.' },
+      { id:'PRD-04', name:'Group Solidarity', category:'Group lending', min:150000, max:2000000, minTerm:3, maxTerm:12, freq:'Weekly', rate:20, method:'Flat', fee:3.0, penalty:0.5, grace:0, status:'Active', desc:'Joint-liability lending for VICOBA groups.' },
+      { id:'PRD-05', name:'Asset Finance', category:'Asset / Equipment', min:500000, max:12000000, minTerm:6, maxTerm:24, freq:'Monthly', rate:15, method:'Reducing balance', fee:2.5, penalty:0.5, grace:14, status:'Inactive', desc:'Financing for productive equipment & vehicles.' },
+    ];
+    // Applications across pipeline
+    const applications = [
+      { id:'LAP-2026-0042', customer:'CUS-1003', product:'PRD-01', amount:1500000, term:9, purpose:'Restock salon inventory and add two dryers', status:'Under Review', officer:'Amina Hassan', created:'2026-06-18', docs:3 },
+      { id:'LAP-2026-0041', customer:'CUS-1002', product:'PRD-01', amount:900000, term:6, purpose:'Buy spare parts for resale', status:'Submitted', officer:'Amina Hassan', created:'2026-06-20', docs:2 },
+      { id:'LAP-2026-0040', customer:'CUS-1004', product:'PRD-02', amount:3000000, term:12, purpose:'Coffee season inputs — fertiliser & labour', status:'Approved', officer:'Daudi Mtwara', created:'2026-06-12', docs:4 },
+      { id:'LAP-2026-0039', customer:'CUS-1006', product:'PRD-05', amount:6000000, term:18, purpose:'Delivery vehicle for hardware shop', status:'Draft', officer:'Amina Hassan', created:'2026-06-21', docs:1 },
+      { id:'LAP-2026-0038', customer:'CUS-1001', product:'PRD-01', amount:1200000, term:9, purpose:'Bulk fabric purchase ahead of festive season', status:'Rejected', officer:'Daudi Mtwara', created:'2026-06-05', docs:3 },
+    ];
+    // Active loan accounts
+    const loans = [
+      { id:'LN-2026-0188', customer:'CUS-1001', product:'PRD-01', principal:1000000, rate:18, term:9, method:'Flat', disbursed:'2026-02-10', channel:'M-Pesa', status:'Active', paid:5 },
+      { id:'LN-2026-0177', customer:'CUS-1002', product:'PRD-01', principal:800000, rate:18, term:6, method:'Flat', disbursed:'2026-01-15', channel:'Tigo Pesa', status:'Overdue', paid:3 },
+      { id:'LN-2026-0165', customer:'CUS-1006', product:'PRD-05', principal:5000000, rate:15, term:18, method:'Reducing balance', disbursed:'2025-12-01', channel:'Bank transfer — CRDB', status:'Active', paid:6 },
+      { id:'LN-2025-0142', customer:'CUS-1004', product:'PRD-02', principal:2000000, rate:16, term:12, method:'Reducing balance', disbursed:'2025-09-20', channel:'Bank transfer — NMB', status:'Closed', paid:12 },
+    ];
+    const users = [
+      { id:'U-001', name:'Amina Hassan', email:'amina.officer@maltamfi.co.tz', role:'officer', branch:'Kariakoo', status:'Active', last:'2026-06-23 08:14' },
+      { id:'U-002', name:'Daudi Mtwara', email:'daudi.officer@maltamfi.co.tz', role:'officer', branch:'Mwanza', status:'Active', last:'2026-06-23 07:50' },
+      { id:'U-003', name:'Grace Lyimo', email:'grace.manager@maltamfi.co.tz', role:'manager', branch:'Kariakoo', status:'Active', last:'2026-06-22 17:32' },
+      { id:'U-004', name:'Said Juma', email:'said.ops@maltamfi.co.tz', role:'operations', branch:'HQ', status:'Active', last:'2026-06-23 08:01' },
+      { id:'U-005', name:'Halima Ngowi', email:'halima.cashier@maltamfi.co.tz', role:'cashier', branch:'Kariakoo', status:'Active', last:'2026-06-23 08:22' },
+      { id:'U-006', name:'Joseph Kimaro', email:'joseph.admin@maltamfi.co.tz', role:'admin', branch:'HQ', status:'Active', last:'2026-06-23 06:40' },
+      { id:'U-007', name:'Neema Shirima', email:'neema.officer@maltamfi.co.tz', role:'officer', branch:'Arusha', status:'Inactive', last:'2026-04-11 12:09' },
+    ];
+    const audit = {
+      'LAP-2026-0042': [
+        { actor:'Amina Hassan', role:'Loan Officer', action:'Application submitted', detail:'Submitted for review', time:'2026-06-18 09:12' },
+        { actor:'System', role:'System', action:'Affordability check', detail:'DSR computed at 38% — within policy', time:'2026-06-18 09:12' },
+        { actor:'Grace Lyimo', role:'Branch Manager', action:'Moved to Under Review', detail:'Assigned to assessment', time:'2026-06-18 14:30' },
+      ],
+    };
+    // ---- generated bulk records (so filters & pagination are demonstrable) ----
+    const fnames=['Asha','Emmanuel','Mwajuma','Hamisi','Esther','Salma','Mariamu','Godfrey','Anna','Lucy','Joyce','Editha','Bakari','Rajabu','Tatu','Yusuf','Doto','Kulwa','Furaha','Pendo','Nuru','Issa','Saidi','Maria','Paulo','Veronica','Aziza','Mussa'];
+    const lnames=['Massawe','Mrema','Kweka','Maganga','Chenga','Mhando','Komba','Sanga','Ndossi','Mwasota','Lema','Mallya','Swai','Temba','Kabula','Mwita','Bushiri','Nyoni','Mlowe','Kibona'];
+    const occs=[['Vegetable vendor','Green Market Stall'],['Tailor','Stitch & Style'],['Carpenter','Mango Furniture'],['Fishmonger','Lake Fresh Fish'],['Charcoal trader','Moto Supplies'],['Pharmacy owner','Afya Chemist'],['Poultry farmer','Kuku Bora Farm'],['Welder','Imara Metal Works'],['Grocer','Duka la Mwanga'],['Tour guide','Safari Routes']];
+    const regions=[['Dar es Salaam','Temeke'],['Mbeya','Iyunga'],['Tanga','Chumbageni'],['Morogoro','Kihonda'],['Arusha','Sekei'],['Mwanza','Pamba'],['Dodoma','Makole'],['Kilimanjaro','Moshi Urban']];
+    const photos=['#caa472','#7d9b8a','#b48a9c','#9a8b6f','#a89070','#8c9bad','#9f8aa6','#7f9a76','#b09a6a'];
+    let sd=987654321; const rnd=()=>{ sd=(sd*1103515245+12345)&0x7fffffff; return sd/0x7fffffff; };
+    const pick=a=>a[Math.floor(rnd()*a.length)];
+    const pad=(n,l)=>String(n).padStart(l,'0');
+    for(let i=7;i<=26;i++){ const fn=pick(fnames), ln=pick(lnames), oc=pick(occs), rg=pick(regions);
+      const kyc = rnd()<0.68?'Verified':(rnd()<0.6?'Pending':'Rejected'); const status = rnd()<0.85?'Active':'Inactive';
+      const yr=pick(['2024','2025','2026']);
+      customers.push({ id:'CUS-10'+pad(i,2), name:fn+' '+ln, gender:rnd()>0.5?'Female':'Male', dob:(1980+Math.floor(rnd()*20))+'-'+pad(1+Math.floor(rnd()*12),2)+'-'+pad(1+Math.floor(rnd()*27),2), phone:'+255 7'+(10+Math.floor(rnd()*80))+' '+pad(Math.floor(rnd()*1000),3)+' '+pad(Math.floor(rnd()*1000),3), email:fn.toLowerCase()+'.'+ln.toLowerCase()+'@gmail.com', nida:(1980+Math.floor(rnd()*20))+pad(1+Math.floor(rnd()*12),2)+pad(1+Math.floor(rnd()*27),2)+'-'+(10000+Math.floor(rnd()*90000))+'-'+pad(Math.floor(rnd()*100000),5)+'-'+pad(Math.floor(rnd()*100),2), region:rg[0], ward:rg[1], address:rg[1]+', '+rg[0], occupation:oc[0], business:oc[1], monthlyIncome:(600000+Math.floor(rnd()*30)*100000), nokName:pick(fnames)+' '+ln, nokRelation:pick(['Spouse','Sibling','Parent','Cousin']), nokPhone:'+255 7'+(10+Math.floor(rnd()*80))+' '+pad(Math.floor(rnd()*1000),3)+' '+pad(Math.floor(rnd()*1000),3), status, kyc, joined:yr+'-'+pad(1+Math.floor(rnd()*12),2)+'-'+pad(1+Math.floor(rnd()*27),2), photo:pick(photos) });
+    }
+    const appStatuses=['Draft','Submitted','Submitted','Under Review','Under Review','Approved','Rejected','Cancelled'];
+    const officers=['Amina Hassan','Daudi Mtwara','Neema Shirima'];
+    for(let i=43;i<=58;i++){ const c=pick(customers), p=pick(products);
+      const amount=(p.min + Math.floor(rnd()*((p.max-p.min)/100000+1))*100000);
+      applications.push({ id:'LAP-2026-00'+i, customer:c.id, product:p.id, amount, term:p.minTerm+Math.floor(rnd()*(p.maxTerm-p.minTerm+1)), purpose:pick(['Working capital top-up','Stock purchase','Equipment financing','Business expansion','Seasonal inputs & supplies']), status:pick(appStatuses), officer:pick(officers), created:'2026-'+pad(5+Math.floor(rnd()*2),2)+'-'+pad(1+Math.floor(rnd()*27),2), docs:1+Math.floor(rnd()*4) });
+    }
+    const loanStatuses=['Active','Active','Active','Overdue','Closed'];
+    const channels=['M-Pesa','Tigo Pesa','Airtel Money','Bank transfer — CRDB','Bank transfer — NMB'];
+    for(let i=200;i<=216;i++){ const c=pick(customers), p=pick(products);
+      const term=p.minTerm+Math.floor(rnd()*(p.maxTerm-p.minTerm+1)); const st=pick(loanStatuses);
+      loans.push({ id:'LN-2026-0'+i, customer:c.id, product:p.id, principal:(p.min + Math.floor(rnd()*((p.max-p.min)/100000+1))*100000), rate:p.rate, term, method:p.method, disbursed:pick(['2025','2026'])+'-'+pad(1+Math.floor(rnd()*12),2)+'-'+pad(1+Math.floor(rnd()*27),2), channel:pick(channels), status:st, paid: st==='Closed'? term : Math.floor(rnd()*Math.max(1,term-1)) });
+    }
+    const uroles=['officer','officer','manager','cashier','operations'];
+    const ubranches=['Kariakoo','Mwanza','Arusha','Dodoma','Moshi','HQ'];
+    for(let i=8;i<=15;i++){ const fn=pick(fnames), ln=pick(lnames), role=pick(uroles);
+      users.push({ id:'U-0'+pad(i,2), name:fn+' '+ln, email:fn.toLowerCase()+'.'+role+'@maltamfi.co.tz', role, branch:pick(ubranches), status:rnd()<0.85?'Active':'Inactive', last:'2026-06-'+pad(10+Math.floor(rnd()*13),2)+' '+pad(7+Math.floor(rnd()*10),2)+':'+pad(Math.floor(rnd()*60),2) });
+    }
+    return { customers, products, applications, loans, users, audit };
+  }
+
+  // ---------- HELPERS ----------
+  money(n){ return 'TZS ' + Number(n||0).toLocaleString('en-US'); }
+  moneyShort(n){ if(n>=1e9) return 'TZS '+(n/1e9).toFixed(1)+'B'; if(n>=1e6) return 'TZS '+(n/1e6).toFixed(1)+'M'; if(n>=1e3) return 'TZS '+Math.round(n/1e3)+'K'; return 'TZS '+n; }
+  fmtDate(s){ if(!s) return '—'; const [y,m,d]=s.split('-'); const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${+d} ${M[+m-1]} ${y}`; }
+  cust(id){ return this.state.data.customers.find(c=>c.id===id) || {}; }
+  prod(id){ return this.state.data.products.find(p=>p.id===id) || {}; }
+  pill(s){ const m={ Draft:['#6b7280','#f1efe9'], Submitted:['#1d4ed8','#e8eefb'], 'Under Review':['#b45309','#fbf0df'], Approved:['#047857','#e3f3eb'], Rejected:['#b91c1c','#fbeaea'], Cancelled:['#6b7280','#f1efe9'], 'Pending Disbursement':['#b45309','#fbf0df'], Disbursed:['#047857','#e3f3eb'], Failed:['#b91c1c','#fbeaea'], Active:['#047857','#e3f3eb'], Overdue:['#b91c1c','#fbeaea'], Closed:['#6b7280','#f1efe9'], 'Written Off':['#6b7280','#ece8e0'], Pending:['#b45309','#fbf0df'], Verified:['#047857','#e3f3eb'], Inactive:['#6b7280','#f1efe9'] }; const c=m[s]||['#6b7280','#f1efe9']; return { fg:c[0], bg:c[1] }; }
+
+  // schedule: flat or reducing
+  schedule(principal, ratePct, term, method, startDate){
+    const rows=[]; const start=startDate?new Date(startDate):new Date('2026-06-10');
+    const monthlyFee=0;
+    if(method && method.indexOf('Reducing')>=0){
+      const mr=ratePct/100/12; let bal=principal;
+      const pay = Math.round(principal*mr/(1-Math.pow(1+mr,-term)));
+      for(let i=1;i<=term;i++){ const interest=Math.round(bal*mr); let prin=pay-interest; if(i===term) prin=bal; bal=Math.max(0,bal-prin); const due=new Date(start); due.setMonth(start.getMonth()+i); rows.push({ n:i, due:due.toISOString().slice(0,10), principal:prin, interest, fee:monthlyFee, total:prin+interest+monthlyFee, balance:bal }); }
+    } else {
+      const totalInt=Math.round(principal*(ratePct/100)*(term/12));
+      const perInt=Math.round(totalInt/term); const perPrin=Math.round(principal/term); let bal=principal;
+      for(let i=1;i<=term;i++){ let prin=perPrin; if(i===term) prin=bal; bal=Math.max(0,bal-prin); const due=new Date(start); due.setMonth(start.getMonth()+i); rows.push({ n:i, due:due.toISOString().slice(0,10), principal:prin, interest:perInt, fee:monthlyFee, total:prin+perInt+monthlyFee, balance:bal }); }
+    }
+    return rows;
+  }
+
+  toast(msg){ this.setState({ toast: msg }); clearTimeout(this._t); this._t=setTimeout(()=>this.setState({toast:null}), 2600); }
+
+  // ---------- PERMISSIONS / NAV ----------
+  roleMeta(){ return {
+    admin:{ label:'Administrator', name:'Joseph Kimaro', branch:'HQ' },
+    officer:{ label:'Loan Officer', name:'Amina Hassan', branch:'Kariakoo' },
+    manager:{ label:'Branch Manager', name:'Grace Lyimo', branch:'Kariakoo' },
+    operations:{ label:'Operations Officer', name:'Said Juma', branch:'HQ' },
+    cashier:{ label:'Cashier', name:'Halima Ngowi', branch:'Kariakoo' },
+  }; }
+  navDef(){ return [
+    { page:'dashboard', label:'Dashboard', icon:'▤', roles:['admin','officer','manager','operations','cashier'] },
+    { page:'customers', label:'Customers', icon:'☻', roles:['admin','officer','manager','operations'] },
+    { page:'applications', label:'Loan Applications', icon:'❏', roles:['admin','officer','manager'] },
+    { page:'approvals', label:'Assessment & Approval', icon:'✓', roles:['admin','manager'], badgePage:'approvals' },
+    { page:'disbursements', label:'Disbursements', icon:'⇄', roles:['admin','operations','manager'], badgePage:'disbursements' },
+    { page:'accounts', label:'Loan Accounts', icon:'❑', roles:['admin','officer','manager','operations'] },
+    { page:'collections', label:'Collections', icon:'₵', roles:['admin','cashier','officer','manager'], badgePage:'collections' },
+    { page:'products', label:'Loan Products', icon:'⚙', roles:['admin','manager'] },
+    { page:'users', label:'User Management', icon:'⚇', roles:['admin'] },
+  ]; }
+  can(action){ const r=this.state.role; const map={ approve:['admin','manager'], configProducts:['admin','manager'], manageUsers:['admin'], disburse:['admin','operations','manager'], receivePayment:['admin','cashier','manager'], createApplication:['admin','officer','manager'], createCustomer:['admin','officer','manager','operations'] }; return (map[action]||[]).includes(r); }
+
+  badgeFor(page){ const d=this.state.data; if(page==='approvals') return d.applications.filter(a=>['Submitted','Under Review'].includes(a.status)).length; if(page==='disbursements') return d.applications.filter(a=>a.status==='Approved').length; if(page==='collections') return d.loans.filter(l=>l.status==='Overdue').length; return 0; }
+
+  // ---------- NAV ACTIONS ----------
+  nav(page, params={}){ this.setState({ page, params, wizardStep:1, form:{ ...this.state.form } }); const m=document.querySelector('main'); if(m) m.scrollTop=0; }
+
+  // ---------- TABLE FILTERS & PAGINATION ----------
+  tf(key){ const d=this.state.tf||{}; return d[key]||{q:'',from:'',to:'',status:'All',page:1}; }
+  setTf(key,patch){ const all={...(this.state.tf||{})}; const cur=all[key]||{q:'',from:'',to:'',status:'All',page:1}; const next={...cur,...patch}; if(!('page' in patch)) next.page=1; all[key]=next; this.setState({tf:all}); }
+  inRange(ds,from,to){ if(from && (!ds||ds<from)) return false; if(to && (!ds||ds>to)) return false; return true; }
+  buildTbl(key, rows, pageSize){
+    const t=this.tf(key); const PS=pageSize||8; const total=rows.length; const pages=Math.max(1,Math.ceil(total/PS)); const p=Math.min(t.page||1,pages); const start=(p-1)*PS;
+    return {
+      q:t.q||'', from:t.from||'', to:t.to||'', status:t.status||'All',
+      onQ:(e)=>this.setTf(key,{q:e.target.value}),
+      onFrom:(e)=>this.setTf(key,{from:e.target.value}),
+      onTo:(e)=>this.setTf(key,{to:e.target.value}),
+      onStatus:(e)=>this.setTf(key,{status:e.target.value}),
+      clear:()=>this.setTf(key,{q:'',from:'',to:'',status:'All',page:1}),
+      rows: rows.slice(start,start+PS),
+      total, showing: total? (start+1)+'–'+Math.min(start+PS,total)+' of '+total : '0 of 0',
+      multiPage: pages>1,
+      pages: [...Array(pages)].map((_,i)=>({ n:i+1, bg:(i+1===p)?'var(--am-accent,#b45309)':'#fff', fg:(i+1===p)?'#fff':'#6f6a61', bd:(i+1===p)?'var(--am-accent,#b45309)':'#d6d1c7', go:()=>this.setTf(key,{page:i+1}) })),
+      prev:()=>this.setTf(key,{page:Math.max(1,p-1)}),
+      next:()=>this.setTf(key,{page:Math.min(pages,p+1)}),
+    };
+  }
+
+  // ---------- INPUT ----------
+  onInput = (e)=>{ const t=e.target; const v = t.type==='checkbox'? t.checked : t.value; this.setState({ form: { ...this.state.form, [t.name]: v } }); };
+  onRoleChange = (e)=>{ const role=e.target.value; const nd=this.navDef().filter(n=>n.roles.includes(role)); const page = nd.find(n=>n.page===this.state.page)? this.state.page : nd[0].page; this.setState({ role, page, params:{} }); this.toast('Now viewing as '+this.roleMeta()[role].label); };
+
+  doLogin = ()=>{ const f=this.state.form; if(!f.password){ this.setState({ loginError:'Enter your password to continue.' }); return; } this.setState({ authed:true, loginError:'' }); };
+  doLogout = ()=>{ this.setState({ authed:false, form:{ ...this.state.form, password:'' } }); };
+  goReset = ()=>{ this.setState({ form:{...this.state.form, loginView:'reset'}, resetSent:false }); };
+  backToLogin = ()=>{ this.setState({ form:{...this.state.form, loginView:'login'} }); };
+  doResetRequest = ()=>{ if(!this.state.form.resetEmail){ return; } this.setState({ resetSent:true }); };
+  goProfile = ()=> this.nav('profile');
+
+  // ---------- RENDER ----------
+  themeCSS(){
+    const P=this.props||{};
+    const accents={ Amber:['#b45309','#92400e'], Indigo:['#4338ca','#312e81'], Teal:['#0f766e','#115e59'], Rose:['#be123c','#881337'] };
+    const [ac,acd]=accents[P.accent]||accents.Amber;
+    const pad={ Compact:6, Comfortable:11, Spacious:18 }[P.density!=null?P.density:'Comfortable']; const pY=pad!=null?pad:11;
+    const tones={ Midnight:'#1f1d1a', Espresso:'#2a201b', Forest:'#16241f', Graphite:'#22242b' };
+    const tone=tones[P.sidebarTone]||tones.Midnight;
+    const css=`:root{--am-accent:${ac};--am-accent-dark:${acd};}
+main td,main th{padding-top:${pY}px !important;padding-bottom:${pY}px !important;}
+aside{background:${tone} !important;}`;
+    return React.createElement('style',{ dangerouslySetInnerHTML:{ __html:css } });
+  }
+
+  renderVals(){
+    const S=this.state; const d=S.data; const rm=this.roleMeta()[S.role];
+    const isLogin = !S.authed;
+    const base = {
+      themeCSS: this.themeCSS(),
+      isLogin, isApp: S.authed,
+      role: S.role, roleLabel: rm.label, branch: rm.branch,
+      userName: rm.name, userFirst: rm.name.split(' ')[0], userInitials: rm.name.split(' ').map(x=>x[0]).slice(0,2).join(''),
+      form: S.form, toast: S.toast,
+      roleOptions: [ {id:'admin',label:'Administrator'},{id:'officer',label:'Loan Officer'},{id:'manager',label:'Branch Manager'},{id:'operations',label:'Operations Officer'},{id:'cashier',label:'Cashier'} ],
+      goProfile: this.goProfile, doLogout: this.doLogout, onInput: this.onInput, onRoleChange: this.onRoleChange,
+    };
+
+    // LOGIN
+    base.loginIsReset = S.form.loginView==='reset';
+    base.loginIsSignin = S.form.loginView!=='reset';
+    base.loginError = S.loginError; base.resetSent = S.resetSent;
+    base.doLogin=this.doLogin; base.goReset=this.goReset; base.backToLogin=this.backToLogin; base.doResetRequest=this.doResetRequest;
+    base.demoAccounts = [
+      { role:'Loan Officer', user:'amina.officer', login:()=>this.setState({form:{...S.form,username:'amina.officer'},role:'officer',authed:true}) },
+      { role:'Branch Manager', user:'grace.manager', login:()=>this.setState({form:{...S.form,username:'grace.manager'},role:'manager',authed:true}) },
+      { role:'Operations', user:'said.ops', login:()=>this.setState({form:{...S.form,username:'said.ops'},role:'operations',authed:true}) },
+      { role:'Cashier', user:'halima.cashier', login:()=>this.setState({form:{...S.form,username:'halima.cashier'},role:'cashier',authed:true}) },
+      { role:'Administrator', user:'joseph.admin', login:()=>this.setState({form:{...S.form,username:'joseph.admin'},role:'admin',authed:true}) },
+    ];
+
+    // NAV
+    const navExpanded = !S.navCollapsed;
+    base.navExpanded = navExpanded; base.navWidth = navExpanded?228:62;
+    base.navToggleIcon = navExpanded?'«':'»'; base.toggleNav = ()=>this.setState({navCollapsed:!S.navCollapsed});
+    base.navItems = this.navDef().filter(n=>n.roles.includes(S.role)).map(n=>{ const active=S.page===n.page || (S.params.from===n.page); const badge=n.badgePage?this.badgeFor(n.badgePage):0; return { label:n.label, icon:n.icon, go:()=>this.nav(n.page), bg: active?'var(--am-accent,#b45309)':'transparent', fg: active?'#fff':'#cfc9bf', showBadge: badge>0 && navExpanded, badge:String(badge) }; });
+
+    // CRUMB
+    const titles={ dashboard:'Dashboard', customers:'Customers', customer:'Customers', 'customer-new':'Customers', products:'Loan Products', 'product-form':'Loan Products', applications:'Loan Applications', 'application-new':'Loan Applications', application:'Loan Applications', approvals:'Assessment & Approval', disbursements:'Disbursements', disbursement:'Disbursements', accounts:'Loan Accounts', account:'Loan Accounts', collections:'Collections', 'receive-payment':'Collections', users:'User Management', 'user-form':'User Management', profile:'My Profile' };
+    base.crumbModule = titles[S.page]||'';
+    base.crumbLeaf = S.params.crumb || '';
+
+    // DASHBOARD
+    const portfolio = d.loans.filter(l=>l.status!=='Closed').reduce((s,l)=>s+l.principal,0);
+    base.showDashboard = S.page==='dashboard';
+    base.greeting = (new Date().getHours()<12)?'Good morning':(new Date().getHours()<17?'Good afternoon':'Good evening');
+    base.todayStr = 'Monday, 23 June 2026';
+    base.kpis = [
+      { label:'Portfolio outstanding', value:this.moneyShort(portfolio), delta:'▲ 4.2% vs last month', deltaColor:'#047857' },
+      { label:'Active loans', value:String(d.loans.filter(l=>l.status==='Active').length*121), delta:'62 disbursed this month', deltaColor:'#6f6a61' },
+      { label:'PAR > 30 days', value:'6.8%', delta:'▲ 0.4 pts — watch', deltaColor:'#b45309' },
+      { label:'Pending approvals', value:String(this.badgeFor('approvals')), delta:'2 awaiting your review', deltaColor:'#b45309' },
+      { label:'Collected today', value:this.moneyShort(2840000), delta:'14 receipts issued', deltaColor:'#047857' },
+    ];
+    // role-aware primary queue
+    let qTitle, qCols, qRows, qAll;
+    if(S.role==='cashier'){
+      qTitle='Due & overdue today'; qCols=['Borrower','Installment','Due','Status'];
+      qRows=d.loans.filter(l=>l.status!=='Closed').map(l=>{ const c=this.cust(l.customer); const sch=this.schedule(l.principal,l.rate,l.term,l.method,l.disbursed); const nx=sch[l.paid]||sch[sch.length-1]; const p=this.pill(l.status==='Overdue'?'Overdue':'Pending'); return { name:c.name, id:l.id, amount:this.money(nx.total), meta:this.fmtDate(nx.due), status:l.status==='Overdue'?'Overdue':'Due', pillFg:p.fg, pillBg:p.bg, go:()=>this.nav('receive-payment',{id:l.id,crumb:l.id}) }; });
+      qAll=()=>this.nav('collections');
+    } else if(S.role==='operations'){
+      qTitle='Awaiting disbursement'; qCols=['Borrower','Amount','Product','Status'];
+      qRows=d.applications.filter(a=>a.status==='Approved').map(a=>{ const c=this.cust(a.customer); const p=this.pill('Pending Disbursement'); return { name:c.name, id:a.id, amount:this.money(a.amount), meta:this.prod(a.product).name, status:'Ready', pillFg:p.fg, pillBg:p.bg, go:()=>this.nav('disbursement',{id:a.id,crumb:a.id}) }; });
+      qAll=()=>this.nav('disbursements');
+    } else if(S.role==='manager'||S.role==='admin'){
+      qTitle='Applications awaiting decision'; qCols=['Borrower','Amount','Officer','Status'];
+      qRows=d.applications.filter(a=>['Submitted','Under Review'].includes(a.status)).map(a=>{ const c=this.cust(a.customer); const p=this.pill(a.status); return { name:c.name, id:a.id, amount:this.money(a.amount), meta:a.officer, status:a.status, pillFg:p.fg, pillBg:p.bg, go:()=>this.nav('application',{id:a.id,from:'approvals',crumb:a.id}) }; });
+      qAll=()=>this.nav('approvals');
+    } else {
+      qTitle='My recent applications'; qCols=['Borrower','Amount','Created','Status'];
+      qRows=d.applications.map(a=>{ const c=this.cust(a.customer); const p=this.pill(a.status); return { name:c.name, id:a.id, amount:this.money(a.amount), meta:this.fmtDate(a.created), status:a.status, pillFg:p.fg, pillBg:p.bg, go:()=>this.nav('application',{id:a.id,crumb:a.id}) }; });
+      qAll=()=>this.nav('applications');
+    }
+    base.queueTitle=qTitle; base.queueCols=qCols; base.queueRows=qRows; base.queueGoAll=qAll;
+    base.agingBars=[
+      { label:'Current', amount:this.moneyShort(portfolio*0.88), pct:88, color:'#047857' },
+      { label:'1–30 days', amount:this.moneyShort(portfolio*0.06), pct:30, color:'#b45309' },
+      { label:'31–60 days', amount:this.moneyShort(portfolio*0.03), pct:16, color:'#d97706' },
+      { label:'61–90 days', amount:this.moneyShort(portfolio*0.02), pct:10, color:'#dc2626' },
+      { label:'90+ days', amount:this.moneyShort(portfolio*0.01), pct:6, color:'#991b1b' },
+    ];
+    base.activityFeed=[
+      { color:'#047857', text:'Payment of TZS 145,000 received — LN-2026-0188', time:'08:42 · Halima N.' },
+      { color:'#1d4ed8', text:'Application LAP-2026-0041 submitted for review', time:'08:20 · Amina H.' },
+      { color:'#b45309', text:'KYC pending for Neema Kessy (CUS-1003)', time:'07:55 · System' },
+      { color:'#dc2626', text:'LN-2026-0177 flagged overdue — 18 days', time:'07:30 · System' },
+    ];
+    base.dashActions = [];
+    if(this.can('createApplication')) base.dashActions.push({ label:'+ New application', bg:'var(--am-accent,#b45309)', fg:'#fff', bd:'var(--am-accent,#b45309)', go:()=>this.nav('application-new') });
+    if(this.can('createCustomer')) base.dashActions.push({ label:'+ Register customer', bg:'#fff', fg:'#1a1a1a', bd:'#d6d1c7', go:()=>this.nav('customer-new') });
+    if(S.role==='cashier') base.dashActions=[{ label:'+ Receive payment', bg:'var(--am-accent,#b45309)', fg:'#fff', bd:'var(--am-accent,#b45309)', go:()=>this.nav('collections') }];
+
+    // expose helpers/data for later screens
+    Object.assign(base, this.screenVals());
+    return base;
+  }
+
+  // ---------- DOC / KYC ----------
+  docDefs(custId){ const c=this.cust(custId); const base=[
+    { id:custId+'-D1', type:'National ID (NIDA)', file:'nida_front.jpg', size:'1.2 MB', up:'2026-05-28', status:'Verified' },
+    { id:custId+'-D2', type:'Passport photo', file:'passport_photo.jpg', size:'0.4 MB', up:'2026-05-28', status:'Verified' },
+    { id:custId+'-D3', type:'Proof of residence', file:'residence_letter.pdf', size:'0.8 MB', up:'2026-05-29', status:'Pending' },
+    { id:custId+'-D4', type:'Business licence', file:'business_licence.pdf', size:'1.1 MB', up:'2026-05-29', status:'Pending' },
+  ]; if(c.kyc==='Rejected') base[2].status='Rejected'; return base; }
+  setDoc(id,status){ this.setState({ docStatus:{ ...(this.state.docStatus||{}), [id]:status } }); this.toast('Document '+(status==='Verified'?'verified':'rejected')); }
+
+  // ---------- MUTATIONS ----------
+  patchApp(id,patch,msg){ const apps=this.state.data.applications.map(a=>a.id===id?{...a,...patch}:a); this.setState({ data:{...this.state.data, applications:apps} }); if(msg)this.toast(msg); }
+  setKyc(custId,status){ const cs=this.state.data.customers.map(c=>c.id===custId?{...c,kyc:status}:c); this.setState({data:{...this.state.data,customers:cs}}); this.toast('KYC status set to '+status); }
+  toggleUser(id){ const us=this.state.data.users.map(u=>u.id===id?{...u,status:u.status==='Active'?'Inactive':'Active'}:u); this.setState({data:{...this.state.data,users:us}}); this.toast('User status updated'); }
+
+  submitNewApplication(){ const f=this.state.form; if(!f.naCustomer||!f.naProduct||!f.naAmount){ this.toast('Select borrower, product and amount'); return; } const n=this.state.data.applications.length+43; const id='LAP-2026-00'+n; const app={ id, customer:f.naCustomer, product:f.naProduct, amount:+f.naAmount, term:+(f.naTerm||9), purpose:f.naPurpose||'—', status:'Submitted', officer:this.roleMeta()[this.state.role].name, created:'2026-06-23', docs:+(f.naDocs||2) }; this.setState({ data:{...this.state.data, applications:[app,...this.state.data.applications]}, form:{...f, naCustomer:'',naProduct:'',naAmount:'',naTerm:'',naPurpose:''} }); this.nav('application',{id,crumb:id}); this.toast('Application '+id+' submitted'); }
+  saveDraft(){ const f=this.state.form; const n=this.state.data.applications.length+43; const id='LAP-2026-00'+n; const app={ id, customer:f.naCustomer||'CUS-1001', product:f.naProduct||'PRD-01', amount:+(f.naAmount||0), term:+(f.naTerm||9), purpose:f.naPurpose||'—', status:'Draft', officer:this.roleMeta()[this.state.role].name, created:'2026-06-23', docs:+(f.naDocs||1) }; this.setState({ data:{...this.state.data, applications:[app,...this.state.data.applications]} }); this.nav('applications'); this.toast('Draft '+id+' saved'); }
+
+  disburse(){ const f=this.state.form; const id=this.state.params.id; if(!f.disChannel){ this.toast('Select a disbursement channel'); return; } this.patchApp(id,{status:'Disbursed'},'Loan disbursed via '+f.disChannel); this.nav('accounts'); }
+  takePayment(){ const f=this.state.form; if(!f.payAmount){ this.toast('Enter payment amount'); return; } this.setState({ form:{...f, payDone:true} }); this.toast('Payment of '+this.money(+f.payAmount)+' received'); }
+
+  // ---------- SCREEN DATA ----------
+  screenVals(){ try { return this._screenVals(); } catch(e){ console.error('screenVals threw:', e.message, e.stack); return {}; } }
+  _screenVals(){
+    const S=this.state, d=S.data; const v={};
+    v.nav=(p,x)=>this.nav(p,x);
+
+    // ===== CUSTOMERS LIST =====
+    v.showCustomers = S.page==='customers';
+    { const t=this.tf('customers'); const cq=(t.q||'').toLowerCase(); const cf=t.status||'All';
+      let rows=d.customers.filter(c=> (!cq || c.name.toLowerCase().includes(cq)||c.id.toLowerCase().includes(cq)||c.phone.includes(cq)) && (cf==='All'||c.status===cf) && this.inRange(c.joined,t.from,t.to)).map(c=>{ const sp=this.pill(c.status), kp=this.pill(c.kyc); return { ...c, initials:c.name.split(' ').map(x=>x[0]).slice(0,2).join(''), joinedFmt:this.fmtDate(c.joined), spFg:sp.fg, spBg:sp.bg, kpFg:kp.fg, kpBg:kp.bg, go:()=>this.nav('customer',{id:c.id,crumb:c.name}) }; });
+      const tbl=this.buildTbl('customers',rows); v.customersTbl=tbl; v.customerRows=tbl.rows; v.customerCount=tbl.total; }
+    v.goCustomersBack=()=>this.nav('customers');
+    v.canCreateCustomer = this.can('createCustomer');
+    v.goNewCustomer = ()=>this.nav('customer-new');
+    v.custStatusOpts = ['All','Active','Inactive'];
+
+    // ===== CUSTOMER 360 =====
+    v.showCustomer = S.page==='customer';
+    if(v.showCustomer){ const c=this.cust(S.params.id); const sp=this.pill(c.status), kp=this.pill(c.kyc);
+      const cloans = d.loans.filter(l=>l.customer===c.id); const capps=d.applications.filter(a=>a.customer===c.id);
+      v.c=c; v.cSpFg=sp.fg; v.cSpBg=sp.bg; v.cKpFg=kp.fg; v.cKpBg=kp.bg; v.cJoined=this.fmtDate(c.joined); v.cIncome=this.money(c.monthlyIncome);
+      v.cFacts=[ {k:'National ID (NIDA)',val:c.nida},{k:'Date of birth',val:this.fmtDate(c.dob)+' · '+c.gender},{k:'Phone',val:c.phone},{k:'Email',val:c.email},{k:'Region / Ward',val:c.region+' · '+c.ward},{k:'Address',val:c.address},{k:'Occupation',val:c.occupation},{k:'Business',val:c.business},{k:'Monthly income',val:this.money(c.monthlyIncome)},{k:'Next of kin',val:c.nokName+' ('+c.nokRelation+') · '+c.nokPhone} ];
+      const tab=S.params.tab||'overview'; v.cTab=tab; v.cInitials=c.name?c.name.split(' ').map(x=>x[0]).slice(0,2).join(''):'';
+      v.cTabIsOverview=tab==='overview'; v.cTabIsLoans=tab==='loans'; v.cTabIsDocuments=tab==='documents'; v.cTabIsActivity=tab==='activity';
+      v.cTabs=['overview','loans','documents','activity'].map(t=>({ id:t, label:t.charAt(0).toUpperCase()+t.slice(1), active:(t===tab)?'var(--am-accent-dark,#92400e)':'#9a948a', go:()=>this.nav('customer',{id:c.id,tab:t,crumb:c.name}) }));
+      v.cLoans=cloans.map(l=>{ const p=this.pill(l.status); return { id:l.id, product:this.prod(l.product).name, amount:this.money(l.principal), status:l.status, pFg:p.fg, pBg:p.bg, go:()=>this.nav('account',{id:l.id,crumb:l.id}) }; });
+      v.cApps=capps.map(a=>{ const p=this.pill(a.status); return { id:a.id, product:this.prod(a.product).name, amount:this.money(a.amount), status:a.status, pFg:p.fg, pBg:p.bg, go:()=>this.nav('application',{id:a.id,crumb:a.id}) }; });
+      const docs=this.docDefs(c.id).map(doc=>{ const st=(S.docStatus||{})[doc.id]||doc.status; const p=this.pill(st); return { ...doc, status:st, pFg:p.fg, pBg:p.bg, verify:()=>this.setDoc(doc.id,'Verified'), reject:()=>this.setDoc(doc.id,'Rejected'), pending:st==='Pending' }; });
+      v.cDocs=docs;
+      v.cKycCounts={ v:docs.filter(x=>x.status==='Verified').length, p:docs.filter(x=>x.status==='Pending').length, r:docs.filter(x=>x.status==='Rejected').length };
+      v.cNewLoan=()=>{ this.setState({form:{...S.form,naCustomer:c.id}}); this.nav('application-new'); };
+      v.cSetVerified=()=>this.setKyc(c.id,'Verified'); v.cSetRejected=()=>this.setKyc(c.id,'Rejected');
+    }
+
+    // ===== CUSTOMER NEW =====
+    v.showCustomerNew = S.page==='customer-new';
+    v.saveCustomer = ()=>{ const f=S.form; if(!f.ncName||!f.ncPhone||!f.ncNida){ this.toast('Name, phone and NIDA are required'); return; } const id='CUS-10'+ (d.customers.length+1).toString().padStart(2,'0'); const c={ id, name:f.ncName, gender:f.ncGender||'Female', dob:f.ncDob||'1990-01-01', phone:f.ncPhone, email:f.ncEmail||'', nida:f.ncNida, region:f.ncRegion||'Dar es Salaam', ward:f.ncWard||'', address:f.ncAddress||'', occupation:f.ncOcc||'', business:f.ncBiz||'', monthlyIncome:+(f.ncIncome||0), nokName:f.ncNok||'', nokRelation:f.ncNokRel||'', nokPhone:f.ncNokPhone||'', status:'Active', kyc:'Pending', joined:'2026-06-23', photo:'#9a8b6f' }; this.setState({ data:{...d, customers:[c,...d.customers]}, form:{} }); this.nav('customer',{id,crumb:c.name}); this.toast('Customer '+id+' registered — KYC pending'); };
+    v.regionOpts=['Dar es Salaam','Arusha','Mwanza','Dodoma','Kilimanjaro','Mbeya','Tanga'];
+
+    // ===== PRODUCTS =====
+    v.showProducts = S.page==='products';
+    v.canConfigProducts=this.can('configProducts');
+    { const t=this.tf('products'); const q=(t.q||'').toLowerCase(); const f=t.status||'All';
+      let rows=d.products.filter(p=> (!q||p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)||p.category.toLowerCase().includes(q)) && (f==='All'||p.status===f)).map(p=>{ const sp=this.pill(p.status); return { ...p, minFmt:this.moneyShort(p.min), maxFmt:this.moneyShort(p.max), termRange:p.minTerm+'–'+p.maxTerm+' mo', rateFmt:p.rate+'% '+p.method.split(' ')[0].toLowerCase(), spFg:sp.fg, spBg:sp.bg, go:()=>this.nav('product-form',{id:p.id,crumb:p.name}) }; });
+      const tbl=this.buildTbl('products',rows); v.productsTbl=tbl; v.productRows=tbl.rows; }
+    v.prodStatusOpts=['All','Active','Inactive'];
+    v.goNewProduct=()=>this.nav('product-form',{crumb:'New product'});
+    v.showProductForm=S.page==='product-form';
+    if(v.showProductForm){ v.pEdit=S.params.id?this.prod(S.params.id):null; v.pTitle=v.pEdit?('Edit · '+v.pEdit.name):'New loan product'; }
+    v.saveProduct=()=>{ this.nav('products'); this.toast('Product saved'); };
+    v.goProductsBack=()=>this.nav('products');
+    v.catOpts=['Business / SME','Agriculture','Consumer','Group lending','Asset / Equipment'];
+    v.methodOpts=['Flat','Reducing balance']; v.freqOpts=['Weekly','Bi-weekly','Monthly'];
+
+    // ===== APPLICATIONS LIST =====
+    v.showApplications=S.page==='applications';
+    { const t=this.tf('applications'); const q=(t.q||'').toLowerCase(); const af=t.status||'All';
+      let rows=d.applications.filter(a=>{ const c=this.cust(a.customer); return (af==='All'||a.status===af) && (!q||a.id.toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)||(a.officer||'').toLowerCase().includes(q)) && this.inRange(a.created,t.from,t.to); }).map(a=>{ const c=this.cust(a.customer),p=this.pill(a.status); return { id:a.id, name:c.name, custId:c.id, product:this.prod(a.product).name, amount:this.money(a.amount), term:a.term+' mo', officer:a.officer, created:this.fmtDate(a.created), status:a.status, pFg:p.fg, pBg:p.bg, go:()=>this.nav('application',{id:a.id,crumb:a.id}) }; });
+      const tbl=this.buildTbl('applications',rows); v.applicationsTbl=tbl; v.appRows=tbl.rows; }
+    v.appStatusOpts=['All','Draft','Submitted','Under Review','Approved','Rejected','Cancelled'];
+    v.canCreateApp=this.can('createApplication'); v.goNewApp=()=>this.nav('application-new');
+
+    // ===== NEW APPLICATION WIZARD =====
+    v.showApplicationNew=S.page==='application-new';
+    v.wizardStep=S.wizardStep;
+    v.wizIs1=S.wizardStep===1; v.wizIs2=S.wizardStep===2; v.wizIs3=S.wizardStep===3; v.wizIs4=S.wizardStep===4;
+    v.wizNotFirst=S.wizardStep>1; v.wizNotLast=S.wizardStep<4;
+    v.wizSteps=[{n:1,label:'Borrower & product'},{n:2,label:'Loan terms'},{n:3,label:'Documents'},{n:4,label:'Review & submit'}].map(s=>{ const active=s.n===S.wizardStep, done=s.n<S.wizardStep; return {...s, bg: active?'#fbf0df':'transparent', dot: (active||done)?'#b45309':'#cfc9bf', fg: active?'#92400e':(done?'#1a1a1a':'#9a948a')}; });
+    v.wizNext=()=>{ if(S.wizardStep===1 && (!S.form.naCustomer||!S.form.naProduct)){ this.toast('Select a borrower and product'); return; } if(S.wizardStep===2 && !S.form.naAmount){ this.toast('Enter requested amount'); return; } this.setState({wizardStep:Math.min(4,S.wizardStep+1)}); };
+    v.wizBack=()=>this.setState({wizardStep:Math.max(1,S.wizardStep-1)});
+    v.custOpts=d.customers.filter(c=>c.status==='Active').map(c=>({id:c.id,label:c.name+' · '+c.id}));
+    v.prodOpts=d.products.filter(p=>p.status==='Active').map(p=>({id:p.id,label:p.name+' ('+p.rate+'%)'}));
+    v.submitApp=()=>this.submitNewApplication(); v.saveDraftApp=()=>this.saveDraft();
+    if(v.showApplicationNew){ const pp=this.prod(S.form.naProduct); v.naProdInfo=pp.id?{ range:this.money(pp.min)+' – '+this.money(pp.max), term:pp.minTerm+'–'+pp.maxTerm+' months', rate:pp.rate+'% '+pp.method, fee:pp.fee+'% processing' }:null;
+      const amt=+(S.form.naAmount||0), trm=+(S.form.naTerm||pp.minTerm||9);
+      if(amt&&pp.id){ const sch=this.schedule(amt,pp.rate,trm,pp.method); v.naPreview={ totalReq:this.money(amt), installment:this.money(sch[0].total), total:this.money(sch.reduce((s,r)=>s+r.total,0)), interest:this.money(sch.reduce((s,r)=>s+r.interest,0)), n:trm }; } else { v.naPreview={ totalReq:'—', installment:'—', total:'—' }; }
+      const c=this.cust(S.form.naCustomer); v.naCustObj=c.id?{name:c.name, income:this.money(c.monthlyIncome), dsr: amt? Math.round((amt/trm)/c.monthlyIncome*100)+'%':'—', kyc:c.kyc}:null;
+    }
+
+    // ===== APPLICATION / APPROVAL DETAIL =====
+    v.showApplication=S.page==='application';
+    if(v.showApplication){ const a=d.applications.find(x=>x.id===S.params.id); if(a){ const c=this.cust(a.customer),p=this.prod(a.product),pl=this.pill(a.status);
+      v.a=a; v.aCust=c; v.aProd=p; v.aStatusFg=pl.fg; v.aStatusBg=pl.bg; v.aAmount=this.money(a.amount); v.aCreated=this.fmtDate(a.created);
+      v.aReviewMode = (S.params.from==='approvals')||['Submitted','Under Review'].includes(a.status);
+      const sch=this.schedule(a.amount,p.rate,a.term,p.method); v.aSchedule=sch.slice(0,6).map(r=>({n:r.n,due:this.fmtDate(r.due),principal:this.money(r.principal),interest:this.money(r.interest),total:this.money(r.total)})); v.aInstallment=this.money(sch[0].total); v.aTotalRepay=this.money(sch.reduce((s,r)=>s+r.total,0));
+      v.aDsr=Math.round((sch[0].total)/c.monthlyIncome*100); v.aDsrColor=v.aDsr<45?'#047857':(v.aDsr<60?'#b45309':'#b91c1c');
+      v.aTrail=(d.audit[a.id]||[{actor:a.officer,role:'Loan Officer',action:'Application created',detail:'Draft started',time:a.created+' 09:00'}]).map(t=>({...t}));
+      v.aFacts=[ {k:'Borrower',val:c.name},{k:'Product',val:p.name},{k:'Requested amount',val:this.money(a.amount)},{k:'Tenure',val:a.term+' months'},{k:'Repayment',val:p.freq},{k:'Interest',val:p.rate+'% '+p.method},{k:'Purpose',val:a.purpose} ];
+      v.aCanDecide=this.can('approve')&&['Submitted','Under Review'].includes(a.status);
+      v.aCanReview=this.can('approve')&&a.status==='Submitted';
+      v.aToReview=()=>this.patchApp(a.id,{status:'Under Review'},'Moved to Under Review');
+      v.aApprove=()=>{ this.patchApp(a.id,{status:'Approved'},'Application approved'); this.nav('disbursements'); };
+      v.aReject=()=>{ this.patchApp(a.id,{status:'Rejected'},'Application rejected'); };
+      v.aClarify=()=>this.toast('Clarification requested from loan officer');
+      v.aGoCustomer=()=>this.nav('customer',{id:c.id,crumb:c.name});
+      v.aIsApproved=a.status==='Approved'; v.aGoDisburse=()=>this.nav('disbursement',{id:a.id,crumb:a.id});
+    }}
+
+    // ===== APPROVALS QUEUE =====
+    v.showApprovals=S.page==='approvals';
+    { const t=this.tf('approvals'); const q=(t.q||'').toLowerCase(); const af=t.status||'All';
+      let rows=d.applications.filter(a=> ['Submitted','Under Review'].includes(a.status) && (af==='All'||a.status===af)).filter(a=>{ const c=this.cust(a.customer); return (!q||a.id.toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)||(a.officer||'').toLowerCase().includes(q)) && this.inRange(a.created,t.from,t.to); }).map(a=>{ const c=this.cust(a.customer),p=this.pill(a.status); const sch=this.schedule(a.amount,this.prod(a.product).rate,a.term,this.prod(a.product).method); const dsr=Math.round(sch[0].total/c.monthlyIncome*100); return { id:a.id, name:c.name, product:this.prod(a.product).name, amount:this.money(a.amount), officer:a.officer, dsr:dsr+'%', dsrColor:dsr<45?'#047857':(dsr<60?'#b45309':'#b91c1c'), status:a.status, pFg:p.fg, pBg:p.bg, age:this.fmtDate(a.created), go:()=>this.nav('application',{id:a.id,from:'approvals',crumb:a.id}) }; });
+      const tbl=this.buildTbl('approvals',rows); v.approvalsTbl=tbl; v.approvalRows=tbl.rows; }
+    v.apprStatusOpts=['All','Submitted','Under Review'];
+
+    // ===== DISBURSEMENTS =====
+    v.showDisbursements=S.page==='disbursements';
+    { const t=this.tf('disbursements'); const q=(t.q||'').toLowerCase();
+      let rows=d.applications.filter(a=>a.status==='Approved').filter(a=>{ const c=this.cust(a.customer); return (!q||a.id.toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)) && this.inRange(a.created,t.from,t.to); }).map(a=>{ const c=this.cust(a.customer),p=this.pill('Pending Disbursement'); return { id:a.id, name:c.name, product:this.prod(a.product).name, amount:this.money(a.amount), channel:'—', status:'Pending Disbursement', pFg:p.fg, pBg:p.bg, go:()=>this.nav('disbursement',{id:a.id,crumb:a.id}) }; });
+      const tbl=this.buildTbl('disbursements',rows); v.disbursementsTbl=tbl; v.disbRows=tbl.rows; }
+    v.showDisbursement=S.page==='disbursement';
+    if(v.showDisbursement){ const a=d.applications.find(x=>x.id===S.params.id); if(a){ const c=this.cust(a.customer),p=this.prod(a.product); v.da=a; v.dCust=c; v.dProd=p; v.dAmount=this.money(a.amount); const fee=Math.round(a.amount*p.fee/100); v.dFee=this.money(fee); v.dNet=this.money(a.amount-fee);
+      const sch=this.schedule(a.amount,p.rate,a.term,p.method); v.dInstallment=this.money(sch[0].total); v.dTotal=this.money(sch.reduce((s,r)=>s+r.total,0)); v.dFirstDue=this.fmtDate(sch[0].due); v.dLastDue=this.fmtDate(sch[sch.length-1].due); v.dTerm=a.term;
+      v.dCanDisburse=this.can('disburse'); v.dCannotDisburse=!this.can('disburse'); v.dDisburse=()=>this.disburse(); v.dAccepted=S.form.disAccepted;
+      v.channelOpts=['M-Pesa','Tigo Pesa','Airtel Money','Bank transfer — CRDB','Bank transfer — NMB','Cash']; }}
+
+    // ===== ACCOUNTS =====
+    v.showAccounts=S.page==='accounts';
+    { const t=this.tf('accounts'); const q=(t.q||'').toLowerCase(); const af=t.status||'All';
+      let rows=d.loans.filter(l=>{ const c=this.cust(l.customer); return (af==='All'||l.status===af) && (!q||l.id.toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)) && this.inRange(l.disbursed,t.from,t.to); }).map(l=>{ const c=this.cust(l.customer),p=this.pill(l.status); const sch=this.schedule(l.principal,l.rate,l.term,l.method,l.disbursed); const out=sch.slice(l.paid).reduce((s,r)=>s+r.total,0); const nx=sch[l.paid]; return { id:l.id, name:c.name, product:this.prod(l.product).name, principal:this.money(l.principal), outstanding:this.money(out), next: nx?this.fmtDate(nx.due):'—', status:l.status, pFg:p.fg, pBg:p.bg, go:()=>this.nav('account',{id:l.id,crumb:l.id}) }; });
+      const tbl=this.buildTbl('accounts',rows); v.accountsTbl=tbl; v.accountRows=tbl.rows; }
+    v.acctStatusOpts=['All','Active','Overdue','Closed','Written Off'];
+    v.showAccount=S.page==='account';
+    if(v.showAccount){ const l=d.loans.find(x=>x.id===S.params.id); if(l){ const c=this.cust(l.customer),p=this.prod(l.product),pl=this.pill(l.status);
+      const sch=this.schedule(l.principal,l.rate,l.term,l.method,l.disbursed);
+      const paidRows=sch.slice(0,l.paid); const out=sch.slice(l.paid).reduce((s,r)=>s+r.total,0); const paidAmt=paidRows.reduce((s,r)=>s+r.total,0);
+      v.l=l; v.lCust=c; v.lProd=p; v.lStatusFg=pl.fg; v.lStatusBg=pl.bg;
+      v.lFacts=[ {k:'Borrower',val:c.name},{k:'Product',val:p.name},{k:'Disbursed',val:this.fmtDate(l.disbursed)},{k:'Channel',val:l.channel},{k:'Interest',val:l.rate+'% '+l.method},{k:'Tenure',val:l.term+' months'} ];
+      v.lPrincipal=this.money(l.principal); v.lOutstanding=this.money(out); v.lPaid=this.money(paidAmt); v.lProgress=Math.round(l.paid/l.term*100);
+      const nx=sch[l.paid]; v.lNext=nx?{due:this.fmtDate(nx.due),amount:this.money(nx.total)}:null;
+      v.lSchedule=sch.map((r,i)=>{ const st=i<l.paid?'Paid':(l.status==='Overdue'&&i===l.paid?'Overdue':'Due'); const pp=this.pill(st==='Paid'?'Verified':(st==='Overdue'?'Overdue':'Pending')); return { n:r.n, due:this.fmtDate(r.due), principal:this.money(r.principal), interest:this.money(r.interest), total:this.money(r.total), balance:this.money(r.balance), status:st, pFg:pp.fg, pBg:pp.bg }; });
+      v.lTxns=paidRows.map((r,i)=>({ date:this.fmtDate(r.due), ref:'RCP-'+l.id.slice(-4)+'-'+(i+1), method:l.channel.includes('Bank')?'Bank':'Mobile money', amount:this.money(r.total) })).reverse();
+      v.lReceive=()=>this.nav('receive-payment',{id:l.id,crumb:l.id});
+      const lt=S.params.tab||'schedule'; v.lTab=lt;
+      v.lTabIsSchedule=lt==='schedule'; v.lTabIsTransactions=lt==='transactions'; v.lTabIsCharges=lt==='charges'; v.lTabIsNotes=lt==='notes';
+      v.lTabs=['schedule','transactions','charges','notes'].map(t=>({id:t,label:t.charAt(0).toUpperCase()+t.slice(1),color:(t===lt)?'var(--am-accent-dark,#92400e)':'#9a948a',go:()=>this.nav('account',{id:l.id,tab:t,crumb:l.id})}));
+      v.lCharges = l.status==='Overdue'?[{date:this.fmtDate(nx?nx.due:l.disbursed),type:'Late payment penalty',amount:this.money(Math.round(nx?nx.total*0.05:0))}]:[];
+      v.lNoCharges = v.lCharges.length===0;
+    }}
+
+    // ===== COLLECTIONS =====
+    v.showCollections=S.page==='collections';
+    const active=d.loans.filter(l=>l.status!=='Closed');
+    const overdue=active.filter(l=>l.status==='Overdue');
+    v.colBuckets=[ {label:'Current',count:active.filter(l=>l.status==='Active').length,amount:this.moneyShort(active.filter(l=>l.status==='Active').reduce((s,l)=>s+l.principal*0.4,0)),color:'#047857',bg:'#e3f3eb'}, {label:'1–30 days',count:overdue.length,amount:this.moneyShort(overdue.reduce((s,l)=>s+l.principal*0.2,0)),color:'#b45309',bg:'#fbf0df'}, {label:'31–60 days',count:0,amount:'TZS 0',color:'#d97706',bg:'#fbf0df'}, {label:'61–90 days',count:0,amount:'TZS 0',color:'#dc2626',bg:'#fbeaea'}, {label:'90+ days',count:0,amount:'TZS 0',color:'#991b1b',bg:'#fbeaea'} ];
+    { const t=this.tf('collections'); const q=(t.q||'').toLowerCase(); const bf=t.status||'All';
+      let rows=active.map(l=>{ const c=this.cust(l.customer); const sch=this.schedule(l.principal,l.rate,l.term,l.method,l.disbursed); const nx=sch[l.paid]||sch[sch.length-1]; const od=l.status==='Overdue'; const p=this.pill(od?'Overdue':'Active'); return { id:l.id, name:c.name, phone:c.phone, amount:this.money(nx.total), due:this.fmtDate(nx.due), dueIso:nx.due, bucket: od?'1–30 days':'Current', status: od?'Overdue':'Current', pFg:p.fg, pBg:p.bg, canPay:this.can('receivePayment'), pay:()=>this.nav('receive-payment',{id:l.id,crumb:l.id}), ptp:()=>this.toast('Promise-to-pay logged for '+c.name) }; });
+      rows=rows.filter(r=> (!q||r.id.toLowerCase().includes(q)||r.name.toLowerCase().includes(q)||r.phone.includes(q)) && (bf==='All'||r.bucket===bf) && this.inRange(r.dueIso,t.from,t.to));
+      const tbl=this.buildTbl('collections',rows); v.collectionsTbl=tbl; v.collectionRows=tbl.rows; }
+    v.colBucketOpts=['All','Current','1–30 days','31–60 days','61–90 days','90+ days'];
+    v.canReceive=this.can('receivePayment');
+
+    v.showReceivePayment=S.page==='receive-payment';
+    if(v.showReceivePayment){ const l=d.loans.find(x=>x.id===S.params.id); if(l){ const c=this.cust(l.customer); const sch=this.schedule(l.principal,l.rate,l.term,l.method,l.disbursed); const nx=sch[l.paid]||sch[sch.length-1]; v.pl=l; v.pCust=c; v.pDue=this.money(nx.total); v.pDueDate=this.fmtDate(nx.due); v.pInstallment=nx.n; v.pOut=this.money(sch.slice(l.paid).reduce((s,r)=>s+r.total,0)); v.payDone=!!S.form.payDone; v.payNotDone=!S.form.payDone; v.pTake=()=>this.takePayment(); v.payMethodOpts=['Cash','M-Pesa','Tigo Pesa','Airtel Money','Bank deposit']; v.pReceiptNo='RCP-'+l.id.slice(-4)+'-'+(l.paid+1); v.pGoAccount=()=>this.nav('account',{id:l.id,crumb:l.id}); }}
+
+    // ===== USERS =====
+    v.showUsers=S.page==='users';
+    v.canManageUsers=this.can('manageUsers');
+    { const t=this.tf('users'); const q=(t.q||'').toLowerCase(); const f=t.status||'All';
+      let rows=d.users.filter(u=> (!q||u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)||u.branch.toLowerCase().includes(q)) && (f==='All'||u.status===f)).map(u=>{ const p=this.pill(u.status); return { ...u, roleLabel:this.roleMeta()[u.role].label, pFg:p.fg, pBg:p.bg, toggle:()=>this.toggleUser(u.id), toggleLabel:u.status==='Active'?'Deactivate':'Activate', edit:()=>this.nav('user-form',{id:u.id,crumb:u.name}) }; });
+      const tbl=this.buildTbl('users',rows); v.usersTbl=tbl; v.userRows=tbl.rows; }
+    v.userStatusOpts=['All','Active','Inactive'];
+    v.goNewUser=()=>this.nav('user-form',{crumb:'New user'});
+    v.showUserForm=S.page==='user-form';
+    if(v.showUserForm){ v.uEdit=S.params.id?d.users.find(u=>u.id===S.params.id):null; v.uTitle=v.uEdit?('Edit · '+v.uEdit.name):'Create new user'; }
+    v.saveUser=()=>{ this.nav('users'); this.toast('User saved — invite email sent'); };
+    v.goUsersBack=()=>this.nav('users');
+    v.roleFormOpts=[{id:'admin',label:'Administrator'},{id:'officer',label:'Loan Officer'},{id:'manager',label:'Branch Manager'},{id:'operations',label:'Operations Officer'},{id:'cashier',label:'Cashier'}];
+    v.branchOpts=['HQ','Kariakoo','Mwanza','Arusha','Dodoma','Moshi'];
+
+    // ===== PROFILE =====
+    v.showProfile=S.page==='profile';
+    const rm=this.roleMeta()[S.role]; v.profName=rm.name; v.profRole=rm.label; v.profBranch=rm.branch; v.profEmail=rm.name.toLowerCase().replace(' ','.')+'@maltamfi.co.tz';
+    v.profPerms=this.navDef().filter(n=>n.roles.includes(S.role)).map(n=>n.label);
+
+    return v;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,26 +1,164 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+  Malta Microfinance — Loan Management System design system.
+  The warm palette + amber accent from the source design are mapped onto the
+  shadcn/ui CSS-variable contract, so every shadcn component inherits the look.
+*/
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.5rem;
+
+  /* shadcn surface + text */
+  --background: #faf9f6; /* warm cream app background */
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+
+  /* amber brand accent */
+  --primary: #b45309;
+  --primary-foreground: #ffffff;
+  --primary-dark: #92400e;
+
+  --secondary: #f3efe7;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f3efe7;
+  --muted-foreground: #9a948a;
+  --accent: #faf8f3; /* subtle row / hover surface */
+  --accent-foreground: #1a1a1a;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+
+  --border: #e7e3da;
+  --input: #d6d1c7;
+  --ring: #b45309;
+
+  /* dark sidebar (Midnight tone from the design) */
+  --sidebar: #1f1d1a;
+  --sidebar-foreground: #cfc9bf;
+  --sidebar-primary: #b45309;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #33302b;
+  --sidebar-accent-foreground: #f4f1ec;
+  --sidebar-border: #322f2a;
+  --sidebar-muted: #7d776d;
+  --sidebar-ring: #b45309;
+
+  /* extra Malta tokens used across screens */
+  --surface-subtle: #faf8f3; /* table head + row hover */
+  --table-border: #eee8dd;
+  --table-row-border: #f3efe7;
+  --input-soft: #e2ddd3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-surface-subtle: var(--surface-subtle);
+  --color-table-border: var(--table-border);
+  --color-table-row-border: var(--table-row-border);
+  --color-input-soft: var(--input-soft);
+
+  --font-sans: var(--font-ibm-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6d1c7;
+  border-radius: 6px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.25s ease;
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease;
+}
+
+/* numeric / id text uses the mono face, matching the source design */
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
 }
