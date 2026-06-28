@@ -4,6 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { Product } from "@/lib/types";
+import { useCreateProduct, useUpdateProduct } from "@/hooks/queries";
+import type { NewProductInput } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,10 +45,39 @@ export function ProductForm({ product }: { product?: Product | null }) {
   const set = (k: string) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
   const onInput = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => set(k)(e.target.value);
 
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+  const saving = createProduct.isPending || updateProduct.isPending;
+
   function save() {
-    // The mock API treats products as read-only config; persist is simulated.
-    toast("Product saved");
-    router.push("/products");
+    if (!form.pfName.trim()) {
+      toast("Enter a product name");
+      return;
+    }
+    const input: NewProductInput = {
+      name: form.pfName.trim(),
+      category: form.pfCat,
+      min: Number(form.pfMin || 0),
+      max: Number(form.pfMax || 0),
+      minTerm: Number(form.pfMinT || 0),
+      maxTerm: Number(form.pfMaxT || 0),
+      freq: form.pfFreq,
+      rate: Number(form.pfRate || 0),
+      method: form.pfMethod,
+      fee: Number(form.pfFee || 0),
+      penalty: Number(form.pfPen || 0),
+      grace: Number(form.pfGrace || 0),
+      status: active ? "Active" : "Inactive",
+    };
+    const opts = {
+      onSuccess: () => {
+        toast("Product saved");
+        router.push("/products");
+      },
+      onError: (e: Error) => toast(e.message || "Could not save product"),
+    };
+    if (product) updateProduct.mutate({ id: product.id, input }, opts);
+    else createProduct.mutate(input, opts);
   }
 
   const ic = "h-[38px]";
@@ -117,7 +148,9 @@ export function ProductForm({ product }: { product?: Product | null }) {
         </label>
 
         <div className="mt-[22px] flex gap-2.5 border-t border-table-border pt-[18px]">
-          <Button className="h-10 px-5" onClick={save}>Save product</Button>
+          <Button className="h-10 px-5" onClick={save} disabled={saving}>
+            {saving ? "Saving…" : "Save product"}
+          </Button>
           <Button variant="outline" className="h-10 px-[18px]" onClick={() => router.push("/products")}>
             Cancel
           </Button>

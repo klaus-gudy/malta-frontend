@@ -1,65 +1,99 @@
-// In-memory mock API for the Malta LMS. React Query treats these as the data
-// source: queries read snapshots, mutations modify the in-memory DB and the
-// caller invalidates the relevant query keys. Simulated latency makes the
-// loading / fetching states real.
+// HTTP client for the Malta LMS backend (NestJS + PostgreSQL).
+//
+// The exported `api` (queries) and `mutations` objects keep the exact shapes
+// React Query consumes in hooks/queries.ts, so swapping the old in-memory mock
+// for the real backend required no changes there. Set NEXT_PUBLIC_API_URL to
+// point at a different backend; it defaults to the local dev server.
 
-import { seed } from "./seed";
 import type {
   Application,
   ApplicationStatus,
   Customer,
   CustomerDocument,
-  Database,
   KycStatus,
   Loan,
+  Product,
   RoleId,
   User,
 } from "./types";
-import { roleMeta } from "./rbac";
 
-// Singleton DB — survives client-side navigation, resets on full reload.
-let db: Database = seed();
-// KYC document status overrides keyed by document id.
-const docOverrides: Record<string, KycStatus> = {};
+const BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3030/api"
+).replace(/\/$/, "");
 
-function delay<T>(value: T, ms = 220): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
+class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
 }
 
-const clone = <T>(v: T): T =>
-  typeof structuredClone === "function"
-    ? structuredClone(v)
-    : JSON.parse(JSON.stringify(v));
+async function request<T>(
+  path: string,
+  options: RequestInit & { allow404?: boolean } = {},
+): Promise<T> {
+  const { allow404, ...init } = options;
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+
+  // Single-resource lookups treat "not found" as null, matching the old mock.
+  if (res.status === 404 && allow404) {
+    return null as T;
+  }
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = Array.isArray(body?.message)
+        ? body.message.join(", ")
+        : (body?.message ?? detail);
+    } catch {
+      // non-JSON error body — keep statusText
+    }
+    throw new ApiError(res.status, detail);
+  }
+
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
+}
+
+const get = <T>(path: string, allow404 = false) =>
+  request<T>(path, { method: "GET", allow404 });
+
+const post = <T>(path: string, body?: unknown) =>
+  request<T>(path, { method: "POST", body: JSON.stringify(body ?? {}) });
+
+const patch = <T>(path: string, body?: unknown) =>
+  request<T>(path, { method: "PATCH", body: JSON.stringify(body ?? {}) });
 
 // ---------- QUERIES ----------
 export const api = {
-  customers: () => delay(clone(db.customers)),
-  customer: (id: string) =>
-    delay(clone(db.customers.find((c) => c.id === id)) ?? null),
-  products: () => delay(clone(db.products)),
-  product: (id: string) =>
-    delay(clone(db.products.find((p) => p.id === id)) ?? null),
-  applications: () => delay(clone(db.applications)),
+  customers: () => get<Customer[]>("/customers"),
+  customer: (id: string) => get<Customer | null>(`/customers/${id}`, true),
+  products: () => get<Product[]>("/products"),
+  product: (id: string) => get<Product | null>(`/products/${id}`, true),
+  applications: () => get<Application[]>("/applications"),
   application: (id: string) =>
-    delay(clone(db.applications.find((a) => a.id === id)) ?? null),
-  loans: () => delay(clone(db.loans)),
-  loan: (id: string) => delay(clone(db.loans.find((l) => l.id === id)) ?? null),
-  users: () => delay(clone(db.users)),
-  audit: (id: string) => delay(clone(db.audit[id] ?? null)),
-  documents: (custId: string) => delay(documentsFor(custId)),
+    get<Application | null>(`/applications/${id}`, true),
+  loans: () => get<Loan[]>("/loans"),
+  loan: (id: string) => get<Loan | null>(`/loans/${id}`, true),
+  users: () => get<User[]>("/users"),
+  audit: (id: string) => get<import("./types").AuditEntry[] | null>(
+    `/audit/${id}`,
+    true,
+  ),
+  documents: (custId: string) =>
+    get<CustomerDocument[]>(`/customers/${custId}/documents`),
 };
-
-function documentsFor(custId: string): CustomerDocument[] {
-  const c = db.customers.find((x) => x.id === custId);
-  const base: CustomerDocument[] = [
-    { id: custId + "-D1", type: "National ID (NIDA)", file: "nida_front.jpg", size: "1.2 MB", up: "2026-05-28", status: "Verified" },
-    { id: custId + "-D2", type: "Passport photo", file: "passport_photo.jpg", size: "0.4 MB", up: "2026-05-28", status: "Verified" },
-    { id: custId + "-D3", type: "Proof of residence", file: "residence_letter.pdf", size: "0.8 MB", up: "2026-05-29", status: "Pending" },
-    { id: custId + "-D4", type: "Business licence", file: "business_licence.pdf", size: "1.1 MB", up: "2026-05-29", status: "Pending" },
-  ];
-  if (c?.kyc === "Rejected") base[2].status = "Rejected";
-  return base.map((d) => ({ ...d, status: docOverrides[d.id] ?? d.status }));
-}
 
 // ---------- MUTATIONS ----------
 export interface NewCustomerInput {
@@ -80,34 +114,55 @@ export interface NewCustomerInput {
   nokPhone?: string;
 }
 
+export interface NewProductInput {
+  name: string;
+  category: string;
+  min: number;
+  max: number;
+  minTerm: number;
+  maxTerm: number;
+  freq: string;
+  rate: number;
+  method: string;
+  fee: number;
+  penalty: number;
+  grace: number;
+  status?: "Active" | "Inactive";
+  desc?: string;
+}
+
+export interface NewUserInput {
+  name: string;
+  email: string;
+  role: RoleId;
+  branch: string;
+  status?: "Active" | "Inactive";
+}
+
+// A created user carries a one-time temporary password the admin can share.
+export type CreatedUser = User & { tempPassword: string };
+
+export interface AuthResult {
+  id: string;
+  name: string;
+  email: string;
+  role: RoleId;
+  branch: string;
+  status: "Active" | "Inactive";
+  label: string;
+  permissions: string[];
+  token: string;
+}
+
+// Authentication. Username may be an email or its local-part (e.g. "joseph.admin").
+export const auth = {
+  login: (username: string, password: string): Promise<AuthResult> =>
+    post<AuthResult>("/auth/login", { username, password }),
+};
+
 export const mutations = {
-  createCustomer: (input: NewCustomerInput): Promise<Customer> => {
-    const id = "CUS-10" + (db.customers.length + 1).toString().padStart(2, "0");
-    const c: Customer = {
-      id,
-      name: input.name,
-      gender: input.gender || "Female",
-      dob: input.dob || "1990-01-01",
-      phone: input.phone,
-      email: input.email || "",
-      nida: input.nida,
-      region: input.region || "Dar es Salaam",
-      ward: input.ward || "",
-      address: input.address || "",
-      occupation: input.occupation || "",
-      business: input.business || "",
-      monthlyIncome: Number(input.monthlyIncome || 0),
-      nokName: input.nokName || "",
-      nokRelation: input.nokRelation || "",
-      nokPhone: input.nokPhone || "",
-      status: "Active",
-      kyc: "Pending",
-      joined: "2026-06-23",
-      photo: "#9a8b6f",
-    };
-    db = { ...db, customers: [c, ...db.customers] };
-    return delay(clone(c));
-  },
+  createCustomer: (input: NewCustomerInput): Promise<Customer> =>
+    post<Customer>("/customers", input),
 
   createApplication: (
     input: {
@@ -120,91 +175,44 @@ export const mutations = {
       status: Extract<ApplicationStatus, "Draft" | "Submitted">;
     },
     role: RoleId,
-  ): Promise<Application> => {
-    const n = db.applications.length + 43;
-    const id = "LAP-2026-00" + n;
-    const app: Application = {
-      id,
-      customer: input.customer,
-      product: input.product,
-      amount: Number(input.amount),
-      term: Number(input.term || 9),
-      purpose: input.purpose || "—",
-      status: input.status,
-      officer: roleMeta[role].name,
-      created: "2026-06-23",
-      docs: Number(input.docs || (input.status === "Draft" ? 1 : 2)),
-    };
-    db = { ...db, applications: [app, ...db.applications] };
-    return delay(clone(app));
-  },
+  ): Promise<Application> =>
+    post<Application>("/applications", { ...input, role }),
 
   patchApplication: (
     id: string,
-    patch: Partial<Application>,
-  ): Promise<Application | null> => {
-    const apps = db.applications.map((a) => (a.id === id ? { ...a, ...patch } : a));
-    db = { ...db, applications: apps };
-    return delay(clone(apps.find((a) => a.id === id)) ?? null);
-  },
+    patch_: Partial<Application>,
+  ): Promise<Application | null> =>
+    patch<Application | null>(`/applications/${id}`, patch_),
 
-  setKyc: (custId: string, status: KycStatus): Promise<Customer | null> => {
-    const cs = db.customers.map((c) =>
-      c.id === custId ? { ...c, kyc: status } : c,
-    );
-    db = { ...db, customers: cs };
-    return delay(clone(cs.find((c) => c.id === custId)) ?? null);
-  },
+  setKyc: (custId: string, status: KycStatus): Promise<Customer | null> =>
+    patch<Customer | null>(`/customers/${custId}/kyc`, { status }),
 
   setDocStatus: (
     docId: string,
     status: Extract<KycStatus, "Verified" | "Rejected">,
-  ): Promise<void> => {
-    docOverrides[docId] = status;
-    return delay(undefined);
-  },
+  ): Promise<void> =>
+    patch<void>(`/customers/documents/${docId}/status`, { status }),
 
-  toggleUser: (id: string): Promise<User | null> => {
-    const us = db.users.map((u) =>
-      u.id === id
-        ? { ...u, status: u.status === "Active" ? "Inactive" : "Active" }
-        : u,
-    ) as User[];
-    db = { ...db, users: us };
-    return delay(clone(us.find((u) => u.id === id)) ?? null);
-  },
+  createProduct: (input: NewProductInput): Promise<Product> =>
+    post<Product>("/products", input),
 
-  disburse: (applicationId: string, _channel: string): Promise<Loan> => {
-    const app = db.applications.find((a) => a.id === applicationId);
-    const apps = db.applications.map((a) =>
-      a.id === applicationId ? { ...a, status: "Disbursed" as const } : a,
-    );
-    // Materialise a loan account from the approved application.
-    const product = db.products.find((p) => p.id === app?.product);
-    const loan: Loan = {
-      id: "LN-2026-0" + (220 + db.loans.length),
-      customer: app?.customer || "",
-      product: app?.product || "",
-      principal: app?.amount || 0,
-      rate: product?.rate || 0,
-      term: app?.term || 0,
-      method: product?.method || "Flat",
-      disbursed: "2026-06-23",
-      channel: _channel,
-      status: "Active",
-      paid: 0,
-    };
-    db = { ...db, applications: apps, loans: [loan, ...db.loans] };
-    return delay(clone(loan));
-  },
+  updateProduct: (
+    id: string,
+    input: Partial<NewProductInput>,
+  ): Promise<Product> => patch<Product>(`/products/${id}`, input),
 
-  takePayment: (loanId: string, _amount: number): Promise<Loan | null> => {
-    const loans = db.loans.map((l) =>
-      l.id === loanId
-        ? { ...l, paid: Math.min(l.term, l.paid + 1), status: l.status === "Overdue" ? ("Active" as const) : l.status }
-        : l,
-    );
-    db = { ...db, loans };
-    return delay(clone(loans.find((l) => l.id === loanId)) ?? null);
-  },
+  createUser: (input: NewUserInput): Promise<CreatedUser> =>
+    post<CreatedUser>("/users", input),
+
+  updateUser: (id: string, input: Partial<NewUserInput>): Promise<User> =>
+    patch<User>(`/users/${id}`, input),
+
+  toggleUser: (id: string): Promise<User | null> =>
+    patch<User | null>(`/users/${id}/toggle`),
+
+  disburse: (applicationId: string, channel: string): Promise<Loan> =>
+    post<Loan>("/loans/disburse", { applicationId, channel }),
+
+  takePayment: (loanId: string, amount: number): Promise<Loan | null> =>
+    post<Loan | null>(`/loans/${loanId}/payments`, { amount }),
 };

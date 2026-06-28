@@ -5,7 +5,13 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { api, mutations, type NewCustomerInput } from "@/lib/api";
+import {
+  api,
+  mutations,
+  type NewCustomerInput,
+  type NewProductInput,
+  type NewUserInput,
+} from "@/lib/api";
 import type {
   Application,
   KycStatus,
@@ -142,6 +148,48 @@ export function useSetDocStatus(custId: string) {
       status: "Verified" | "Rejected";
     }) => mutations.setDocStatus(docId, status),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.documents(custId) }),
+  });
+}
+
+export function useCreateProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: NewProductInput) => mutations.createProduct(input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.products }),
+  });
+}
+
+export function useUpdateProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: Partial<NewProductInput>;
+    }) => mutations.updateProduct(id, input),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: keys.products });
+      qc.invalidateQueries({ queryKey: keys.product(vars.id) });
+    },
+  });
+}
+
+export function useCreateUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: NewUserInput) => mutations.createUser(input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.users }),
+  });
+}
+
+export function useUpdateUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<NewUserInput> }) =>
+      mutations.updateUser(id, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.users }),
   });
 }
 

@@ -6,14 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSession } from "@/lib/session";
-import type { RoleId } from "@/lib/types";
+import { auth } from "@/lib/api";
 
-const demoAccounts: { role: string; user: string; roleId: RoleId }[] = [
-  { role: "Loan Officer", user: "amina.officer", roleId: "officer" },
-  { role: "Branch Manager", user: "grace.manager", roleId: "manager" },
-  { role: "Operations", user: "said.ops", roleId: "operations" },
-  { role: "Cashier", user: "halima.cashier", roleId: "cashier" },
-  { role: "Administrator", user: "joseph.admin", roleId: "admin" },
+// All seeded demo users share this password (see backend auth.constants.ts).
+const DEMO_PASSWORD = "malta123";
+
+const demoAccounts: { role: string; user: string }[] = [
+  { role: "Loan Officer", user: "amina.officer" },
+  { role: "Branch Manager", user: "grace.manager" },
+  { role: "Operations", user: "said.ops" },
+  { role: "Cashier", user: "halima.cashier" },
+  { role: "Administrator", user: "joseph.admin" },
 ];
 
 export default function LoginPage() {
@@ -25,24 +28,44 @@ export default function LoginPage() {
   const [resetEmail, setResetEmail] = React.useState("");
   const [resetSent, setResetSent] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
 
   // Already signed in → skip the login screen.
   React.useEffect(() => {
     if (authed) router.replace(homeFor(role));
   }, [authed, role, homeFor, router]);
 
-  function signIn(roleId: RoleId) {
-    login(roleId);
-    router.replace(homeFor(roleId));
+  async function signIn(user: string, pass: string) {
+    setError("");
+    setBusy(true);
+    try {
+      const res = await auth.login(user, pass);
+      login({
+        id: res.id,
+        name: res.name,
+        email: res.email,
+        role: res.role,
+        branch: res.branch,
+        label: res.label,
+        token: res.token,
+      });
+      router.replace(homeFor(res.role));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not sign in.");
+      setBusy(false);
+    }
   }
 
   function onSubmit() {
+    if (!username.trim()) {
+      setError("Enter your username to continue.");
+      return;
+    }
     if (!password) {
       setError("Enter your password to continue.");
       return;
     }
-    setError("");
-    signIn("officer");
+    void signIn(username.trim(), password);
   }
 
   return (
@@ -157,8 +180,12 @@ export default function LoginPage() {
                   {error}
                 </div>
               ) : null}
-              <Button className="mt-5 h-11 w-full" onClick={onSubmit}>
-                Sign in
+              <Button
+                className="mt-5 h-11 w-full"
+                onClick={onSubmit}
+                disabled={busy}
+              >
+                {busy ? "Signing in…" : "Sign in"}
               </Button>
               <div className="mt-3.5 text-center">
                 <span
@@ -176,8 +203,9 @@ export default function LoginPage() {
                   {demoAccounts.map((acc) => (
                     <button
                       key={acc.user}
-                      onClick={() => signIn(acc.roleId)}
-                      className="rounded-md border border-[#e0dbd1] bg-card px-2.5 py-2 text-left transition-colors hover:bg-secondary"
+                      disabled={busy}
+                      onClick={() => signIn(acc.user, DEMO_PASSWORD)}
+                      className="rounded-md border border-[#e0dbd1] bg-card px-2.5 py-2 text-left transition-colors hover:bg-secondary disabled:opacity-60"
                     >
                       <div className="text-xs font-semibold">{acc.role}</div>
                       <div className="font-mono text-[10.5px] text-[#9a948a]">

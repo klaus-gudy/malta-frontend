@@ -38,6 +38,22 @@ export default function UsersPage() {
   const { data } = useUsers();
   const toggle = useToggleUser();
   const table = useTable<User>(data, filterUser);
+  // Track which row's status change is in flight so only that button disables.
+  const [pendingId, setPendingId] = React.useState<string | null>(null);
+
+  function onToggle(u: User) {
+    const next = u.status === "Active" ? "deactivate" : "activate";
+    setPendingId(u.id);
+    toggle.mutate(u.id, {
+      onSuccess: (updated) =>
+        toast(
+          `${u.name} ${updated?.status === "Active" ? "activated" : "deactivated"}`,
+        ),
+      onError: (e: Error) =>
+        toast(e.message || `Could not ${next} ${u.name}`),
+      onSettled: () => setPendingId(null),
+    });
+  }
 
   return (
     <div className="max-w-[1340px] animate-fade-up">
@@ -81,11 +97,14 @@ export default function UsersPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        toggle.mutate(u.id, { onSuccess: () => toast("User status updated") })
-                      }
+                      disabled={pendingId === u.id}
+                      onClick={() => onToggle(u)}
                     >
-                      {u.status === "Active" ? "Deactivate" : "Activate"}
+                      {pendingId === u.id
+                        ? "…"
+                        : u.status === "Active"
+                          ? "Deactivate"
+                          : "Activate"}
                     </Button>
                   </div>
                 </TableCell>

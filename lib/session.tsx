@@ -4,14 +4,27 @@ import * as React from "react";
 import type { RoleId } from "./types";
 import { roleMeta, navDef } from "./rbac";
 
+/** The authenticated user, as returned by POST /auth/login. */
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: RoleId;
+  branch: string;
+  label: string;
+  token: string;
+}
+
 interface SessionState {
   authed: boolean;
   role: RoleId;
   navCollapsed: boolean;
+  /** Present after a real sign-in; drives the displayed identity. */
+  user: AuthUser | null;
 }
 
 interface SessionContextValue extends SessionState {
-  login: (role: RoleId) => void;
+  login: (user: AuthUser) => void;
   logout: () => void;
   setRole: (role: RoleId) => void;
   toggleNav: () => void;
@@ -33,6 +46,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     authed: false,
     role: "officer",
     navCollapsed: false,
+    user: null,
   });
   const [hydrated, setHydrated] = React.useState(false);
 
@@ -60,8 +74,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const value = React.useMemo<SessionContextValue>(
     () => ({
       ...state,
-      login: (role) => setState((s) => ({ ...s, authed: true, role })),
-      logout: () => setState((s) => ({ ...s, authed: false })),
+      login: (user) =>
+        setState((s) => ({ ...s, authed: true, role: user.role, user })),
+      logout: () => setState((s) => ({ ...s, authed: false, user: null })),
       setRole: (role) => setState((s) => ({ ...s, role })),
       toggleNav: () => setState((s) => ({ ...s, navCollapsed: !s.navCollapsed })),
       homeFor: homeForRole,
@@ -80,8 +95,18 @@ export function useSession(): SessionContextValue {
   return ctx;
 }
 
-/** Convenience: the active role's display meta. */
+/**
+ * Display meta for the active role. When a real user is signed in, their name
+ * and branch take precedence over the generic role defaults; the label still
+ * follows the active "View as" role.
+ */
 export function useRoleMeta() {
-  const { role } = useSession();
-  return { role, ...roleMeta[role] };
+  const { role, user } = useSession();
+  const base = roleMeta[role];
+  return {
+    role,
+    label: base.label,
+    name: user?.name ?? base.name,
+    branch: user?.branch ?? base.branch,
+  };
 }
