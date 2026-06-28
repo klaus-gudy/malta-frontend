@@ -41,14 +41,28 @@ export function ProductForm({ product }: { product?: Product | null }) {
     pfGrace: product ? String(product.grace) : "",
   });
   const [active, setActive] = React.useState(product ? product.status === "Active" : true);
+  // Validation surfaces after the first save attempt, then updates live as the
+  // user fixes fields. serverErrors holds any messages the backend returns.
+  const [submitted, setSubmitted] = React.useState(false);
+  const [serverErrors, setServerErrors] = React.useState<string[]>([]);
 
-  const set = (k: string) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
-  const onInput = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => set(k)(e.target.value);
+  const set = (k: string) => (v: string) => {
+    setServerErrors([]);
+    setForm((f) => ({ ...f, [k]: v }));
+  };
+  const onInput = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    set(k)(e.target.value);
+  // Amount fields store raw digits but display with thousands separators.
+  const formatAmount = (s: string) => {
+    const digits = s.replace(/\D/g, "");
+    return digits ? Number(digits).toLocaleString("en-US") : "";
+  };
+  const onAmountInput = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    set(k)(e.target.value.replace(/\D/g, ""));
 
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const saving = createProduct.isPending || updateProduct.isPending;
-  const [errors, setErrors] = React.useState<string[]>([]);
 
   // Parse a numeric field: blank → NaN so "required" is enforced (not 0).
   const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
@@ -115,23 +129,31 @@ export function ProductForm({ product }: { product?: Product | null }) {
     };
   }
 
+  // Recomputed every render, so the error list shrinks live as fields are fixed.
+  const validation = validate();
+  const errors = [
+    ...(submitted ? validation.errors : []),
+    ...serverErrors,
+  ];
+
   function save() {
-    const { errors: errs, input } = validate();
-    setErrors(errs);
-    if (!input) {
+    setSubmitted(true);
+    setServerErrors([]);
+    if (!validation.input) {
       toast("Please complete all required fields");
       return;
     }
+    const input = validation.input;
     const opts = {
       onSuccess: () => {
         toast("Product saved");
         router.push("/products");
       },
       // Backend validation messages (array) arrive joined — surface them too.
-      onError: (e: Error) => {
-        setErrors(e.message ? e.message.split(", ") : []);
-        toast("Could not save product");
-      },
+      onError: (e: Error) =>
+        setServerErrors(
+          e.message ? e.message.split(", ") : ["Could not save product"],
+        ),
     };
     if (product) updateProduct.mutate({ id: product.id, input }, opts);
     else createProduct.mutate(input, opts);
@@ -166,8 +188,8 @@ export function ProductForm({ product }: { product?: Product | null }) {
 
         <FormSection className="mt-[22px]">Amount &amp; term limits</FormSection>
         <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-          <Field label="Min amount" required><Input className={mono} value={form.pfMin} onChange={onInput("pfMin")} /></Field>
-          <Field label="Max amount" required><Input className={mono} value={form.pfMax} onChange={onInput("pfMax")} /></Field>
+          <Field label="Min amount" required><Input className={mono} inputMode="numeric" value={formatAmount(form.pfMin)} onChange={onAmountInput("pfMin")} /></Field>
+          <Field label="Max amount" required><Input className={mono} inputMode="numeric" value={formatAmount(form.pfMax)} onChange={onAmountInput("pfMax")} /></Field>
           <Field label="Min term (mo)" required><Input className={mono} value={form.pfMinT} onChange={onInput("pfMinT")} /></Field>
           <Field label="Max term (mo)" required><Input className={mono} value={form.pfMaxT} onChange={onInput("pfMaxT")} /></Field>
         </div>
