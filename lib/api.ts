@@ -15,6 +15,7 @@ import type {
   Loan,
   LoanCharge,
   LoanPayment,
+  LoanSummary,
   Product,
   RoleId,
   User,
@@ -92,6 +93,7 @@ export const api = {
   loanSchedule: (id: string) => get<Installment[]>(`/loans/${id}/schedule`),
   loanPayments: (id: string) => get<LoanPayment[]>(`/loans/${id}/payments`),
   loanCharges: (id: string) => get<LoanCharge[]>(`/loans/${id}/charges`),
+  loanSummary: (id: string) => get<LoanSummary>(`/loans/${id}/summary`),
   users: () => get<User[]>("/users"),
   audit: (id: string) => get<import("./types").AuditEntry[] | null>(
     `/audit/${id}`,

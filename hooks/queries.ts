@@ -30,6 +30,7 @@ export const keys = {
   loanSchedule: (id: string) => ["loanSchedule", id] as const,
   loanPayments: (id: string) => ["loanPayments", id] as const,
   loanCharges: (id: string) => ["loanCharges", id] as const,
+  loanSummary: (id: string) => ["loanSummary", id] as const,
   users: ["users"] as const,
   audit: (id: string) => ["audit", id] as const,
   documents: (id: string) => ["documents", id] as const,
@@ -95,6 +96,13 @@ export const useLoanCharges = (id: string) =>
   useQuery({
     queryKey: keys.loanCharges(id),
     queryFn: () => api.loanCharges(id),
+    enabled: !!id,
+  });
+
+export const useLoanSummary = (id: string) =>
+  useQuery({
+    queryKey: keys.loanSummary(id),
+    queryFn: () => api.loanSummary(id),
     enabled: !!id,
   });
 
@@ -310,6 +318,7 @@ export function useTakePayment() {
       qc.invalidateQueries({ queryKey: keys.loanSchedule(vars.id) });
       qc.invalidateQueries({ queryKey: keys.loanPayments(vars.id) });
       qc.invalidateQueries({ queryKey: keys.loanCharges(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.loanSummary(vars.id) });
     },
   });
 }

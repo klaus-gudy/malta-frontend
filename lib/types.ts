@@ -162,6 +162,22 @@ export interface LoanPayment {
   reference: string;
 }
 
+export interface LoanSummary {
+  loanId: string;
+  principal: number;
+  term: number;
+  status: LoanStatus;
+  scheduledTotal: number;
+  penaltyTotal: number;
+  totalBilled: number;
+  totalPaid: number;
+  repaid: number;
+  outstanding: number;
+  overpaid: number;
+  paidInstallments: number;
+  progress: number;
+}
+
 export type ChargeStatus = "Outstanding" | "Paid" | "Waived";
 
 export interface LoanCharge {

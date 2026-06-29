@@ -35,7 +35,6 @@ export const navDef: NavDef[] = [
   { page: "dashboard", href: "/", label: "Dashboard", icon: "▤", roles: ["admin", "officer", "manager", "operations", "cashier"] },
   { page: "customers", href: "/customers", label: "Customers", icon: "☻", roles: ["admin", "officer", "manager", "operations"] },
   { page: "applications", href: "/applications", label: "Loan Applications", icon: "❏", roles: ["admin", "officer", "manager"] },
-  { page: "approvals", href: "/approvals", label: "Assessment & Approval", icon: "✓", roles: ["admin", "manager"], badgePage: "approvals" },
   { page: "disbursements", href: "/disbursements", label: "Disbursements", icon: "⇄", roles: ["admin", "operations", "manager"], badgePage: "disbursements" },
   { page: "accounts", href: "/accounts", label: "Loan Accounts", icon: "❑", roles: ["admin", "officer", "manager", "operations"] },
   { page: "collections", href: "/collections", label: "Collections", icon: "₵", roles: ["admin", "cashier", "officer", "manager"], badgePage: "collections" },

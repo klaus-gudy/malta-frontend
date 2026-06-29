@@ -9,6 +9,7 @@ import {
   useLoanSchedule,
   useLoanPayments,
   useLoanCharges,
+  useLoanSummary,
 } from "@/hooks/queries";
 import { useSession } from "@/lib/session";
 import { can } from "@/lib/rbac";
@@ -38,10 +39,11 @@ export default function AccountDetailPage() {
   const { data: loan, isLoading } = useLoan(params.id);
   const { data: customer } = useCustomer(loan?.customer ?? "");
   const { data: product } = useProduct(loan?.product ?? "");
-  // Repayment schedule, transactions and charges — served from the backend.
+  // Repayment schedule, transactions, charges and metrics — from the backend.
   const { data: scheduleRows } = useLoanSchedule(params.id);
   const { data: payments } = useLoanPayments(params.id);
   const { data: charges } = useLoanCharges(params.id);
+  const { data: summary } = useLoanSummary(params.id);
 
   function setTab(t: string) {
     router.replace(`/accounts/${params.id}?tab=${t}`, { scroll: false });
@@ -51,20 +53,16 @@ export default function AccountDetailPage() {
   if (!loan || !product) return <div className="text-muted-foreground">Account not found.</div>;
 
   const sched = scheduleRows ?? [];
-  const paidCount = sched.filter((r) => r.status === "Paid").length;
-  const repaid = sched.reduce((s, r) => s + r.paidAmount, 0);
-  const outstandingInstal = sched.reduce((s, r) => s + (r.total - r.paidAmount), 0);
-  const outstandingCharges = (charges ?? [])
-    .filter((c) => c.status === "Outstanding")
-    .reduce((s, c) => s + c.amount, 0);
-  const outstanding = outstandingInstal + outstandingCharges;
-  const progress = loan.term ? Math.round((paidCount / loan.term) * 100) : 0;
 
   const stats = [
-    { label: "Principal", value: money(loan.principal), color: undefined },
-    { label: "Repaid", value: money(repaid), color: "#047857" },
-    { label: "Outstanding", value: money(outstanding), color: undefined },
-    { label: "Progress", value: `${progress}%`, color: undefined },
+    { label: "Principal", value: money(summary?.principal ?? loan.principal), color: undefined },
+    { label: "Repaid", value: money(summary?.repaid ?? 0), color: "#047857" },
+    { label: "Outstanding", value: money(summary?.outstanding ?? 0), color: undefined },
+    {
+      label: "Progress",
+      value: `${summary?.progress ?? 0}%`,
+      color: (summary?.progress ?? 0) > 100 ? "#1d4ed8" : undefined,
+    },
   ];
 
   return (
@@ -94,6 +92,32 @@ export default function AccountDetailPage() {
           </Card>
         ))}
       </div>
+
+      {summary && summary.overpaid > 0 && (
+        <Card className="mb-4 flex flex-wrap items-center justify-between gap-3 border-[#bcd0f5] bg-[#eef3fd] px-5 py-4">
+          <div>
+            <div className="flex items-center gap-2 text-[13px] font-semibold text-[#1d4ed8]">
+              <span className="flex size-5 items-center justify-center rounded-full bg-[#1d4ed8] text-[11px] text-white">✓</span>
+              Loan overpaid — credit balance
+            </div>
+            <div className="mt-1 text-[12px] text-[#475569]">
+              This account has been paid beyond the total billed
+              ({money(summary.totalBilled)}). The surplus can be refunded or
+              applied to a future loan.
+            </div>
+          </div>
+          <div className="flex gap-6">
+            <div className="text-right">
+              <div className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-[#9a948a]">Total paid</div>
+              <div className="mt-0.5 font-mono text-[15px] font-semibold">{money(summary.totalPaid)}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-[#9a948a]">Credit balance</div>
+              <div className="mt-0.5 font-mono text-[17px] font-semibold text-[#1d4ed8]">{money(summary.overpaid)}</div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="mb-4">
