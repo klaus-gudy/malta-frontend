@@ -2,10 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  ArrowLeftRight,
+  Landmark,
+  Settings,
+  UserCog,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { useSession } from "@/lib/session";
 import { navDef } from "@/lib/rbac";
 import { useApplications, useLoans } from "@/hooks/queries";
 import { cn } from "@/lib/utils";
+
+const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  LayoutDashboard,
+  Users,
+  FileText,
+  ArrowLeftRight,
+  Landmark,
+  Settings,
+  UserCog,
+};
 
 export function Sidebar() {
   const { role, navCollapsed, toggleNav } = useSession();
@@ -68,9 +89,16 @@ export function Sidebar() {
                   : "text-sidebar-foreground hover:bg-sidebar-accent",
               )}
             >
-              <span className="w-[18px] flex-shrink-0 text-center text-sm">
-                {item.icon}
-              </span>
+              {(() => {
+                const Icon = iconMap[item.icon];
+                return Icon ? (
+                  <span className="flex w-[18px] flex-shrink-0 items-center justify-center">
+                    <Icon size={18} />
+                  </span>
+                ) : (
+                  <span className="w-[18px] flex-shrink-0 text-center text-sm">{item.icon}</span>
+                );
+              })()}
               {expanded ? (
                 <span className="min-w-0 flex-1 text-[13px] font-medium">
                   {item.label}
@@ -90,7 +118,7 @@ export function Sidebar() {
         onClick={toggleNav}
         className="flex h-[42px] flex-shrink-0 items-center gap-[11px] border-t border-sidebar-border px-[18px] text-[13px] text-sidebar-muted transition-colors hover:bg-sidebar-accent"
       >
-        <span>{expanded ? "«" : "»"}</span>
+        {expanded ? <ChevronsLeft size={16} /> : <ChevronsRight size={16} />}
         {expanded ? <span>Collapse</span> : null}
       </button>
     </aside>

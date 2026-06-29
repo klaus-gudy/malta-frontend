@@ -48,6 +48,7 @@ export default function ApplicationDetailPage() {
   const dsr = customer ? Math.round((installment / customer.monthlyIncome) * 100) : 0;
   const dsrColor = dsr < 45 ? "#047857" : dsr < 60 ? "#b45309" : "#b91c1c";
 
+  const isDraft = app.status === "Draft";
   const canDecide = can(role, "approve") && ["Submitted", "Under Review"].includes(app.status);
   const canReview = can(role, "approve") && app.status === "Submitted";
   const isApproved = app.status === "Approved";
@@ -85,6 +86,11 @@ export default function ApplicationDetailPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2.5">
+          {isDraft && (
+            <Button onClick={() => router.push(`/applications/${app.id}/draft`)}>
+              Continue draft
+            </Button>
+          )}
           {canReview && (
             <Button
               variant="outline"

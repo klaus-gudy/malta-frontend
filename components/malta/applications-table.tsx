@@ -80,7 +80,11 @@ export function ApplicationsTable({
   }
 
   const open = (a: Application) =>
-    router.push(`/applications/${a.id}${isQueue ? "?from=approvals" : ""}`);
+    router.push(
+      a.status === "Draft"
+        ? `/applications/${a.id}/draft`
+        : `/applications/${a.id}${isQueue ? "?from=approvals" : ""}`,
+    );
 
   return (
     <Card className="overflow-hidden">
