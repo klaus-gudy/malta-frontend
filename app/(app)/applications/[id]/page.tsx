@@ -49,8 +49,8 @@ export default function ApplicationDetailPage() {
   const dsrColor = dsr < 45 ? "#047857" : dsr < 60 ? "#b45309" : "#b91c1c";
 
   const isDraft = app.status === "Draft";
-  const canDecide = can(role, "approve") && ["Submitted", "Under Review"].includes(app.status);
-  const canReview = can(role, "approve") && app.status === "Submitted";
+  const isSubmitted = can(role, "approve") && app.status === "Submitted";
+  const isUnderReview = can(role, "approve") && app.status === "Under Review";
   const isApproved = app.status === "Approved";
 
   const facts = [
@@ -91,24 +91,35 @@ export default function ApplicationDetailPage() {
               Continue draft
             </Button>
           )}
-          {canReview && (
-            <Button
-              variant="outline"
-              onClick={() =>
-                patch.mutate(
-                  { id: app.id, patch: { status: "Under Review" } },
-                  { onSuccess: () => toast("Moved to Under Review") },
-                )
-              }
-            >
-              Move to review
-            </Button>
-          )}
-          {canDecide && (
+          {isSubmitted && (
             <>
-              <Button variant="outline" onClick={() => toast("Clarification requested from loan officer")}>
-                Request clarification
+              <Button
+                variant="outline"
+                onClick={() =>
+                  patch.mutate(
+                    { id: app.id, patch: { status: "Under Review" } },
+                    { onSuccess: () => toast("Moved to Under Review") },
+                  )
+                }
+              >
+                Move to review
               </Button>
+              <Button
+                variant="outline"
+                className="border-[#e7c5c5] text-destructive"
+                onClick={() =>
+                  patch.mutate(
+                    { id: app.id, patch: { status: "Rejected" } },
+                    { onSuccess: () => toast("Application rejected") },
+                  )
+                }
+              >
+                Reject
+              </Button>
+            </>
+          )}
+          {isUnderReview && (
+            <>
               <Button
                 variant="outline"
                 className="border-[#e7c5c5] text-destructive"

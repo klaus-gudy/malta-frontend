@@ -20,30 +20,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// Shared applications list. `variant="all"` is the full origination pipeline;
-// `variant="queue"` is the assessment & approval queue (Submitted / Under
-// Review only) with an affordability (DSR) column. Both render identically
-// and open the same /applications/:id detail.
 export function ApplicationsTable({
   variant,
 }: {
-  variant: "all" | "queue";
+  variant: "all" | "assessment" | "approval";
 }) {
   const router = useRouter();
   const { data, isLoading } = useApplications();
   const { data: customers } = useCustomers();
   const { data: products } = useProducts();
 
-  const isQueue = variant === "queue";
+  const isQueue = variant === "assessment" || variant === "approval";
 
   const rows = React.useMemo(
     () =>
-      isQueue
-        ? (data ?? []).filter((a) =>
-            ["Submitted", "Under Review"].includes(a.status),
-          )
-        : (data ?? []),
-    [data, isQueue],
+      variant === "assessment"
+        ? (data ?? []).filter((a) => a.status === "Submitted")
+        : variant === "approval"
+          ? (data ?? []).filter((a) => a.status === "Under Review")
+          : (data ?? []),
+    [data, variant],
   );
 
   const cust = (id: string) => customers?.find((c) => c.id === id);
@@ -92,9 +88,11 @@ export function ApplicationsTable({
         table={table}
         searchPlaceholder="Search application, borrower or officer…"
         statusOptions={
-          isQueue
-            ? ["All", "Submitted", "Under Review"]
-            : ["All", "Draft", "Submitted", "Under Review", "Approved", "Rejected", "Cancelled"]
+          variant === "assessment"
+            ? ["All", "Submitted"]
+            : variant === "approval"
+              ? ["All", "Under Review"]
+              : ["All", "Draft", "Submitted", "Under Review", "Approved", "Rejected", "Cancelled"]
         }
         dateLabel="Created"
       />
@@ -122,7 +120,11 @@ export function ApplicationsTable({
           ) : table.rows.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                {isQueue ? "Nothing awaiting decision." : "No applications found."}
+                {variant === "assessment"
+                  ? "No applications awaiting assessment."
+                  : variant === "approval"
+                    ? "No applications awaiting approval."
+                    : "No applications found."}
               </TableCell>
             </TableRow>
           ) : (

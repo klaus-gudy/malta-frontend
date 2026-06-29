@@ -16,20 +16,19 @@ export default function ApplicationsPage() {
   const { role } = useSession();
   const { data } = useApplications();
 
-  // Only assessors (admin/manager) get the decision queue tab.
   const canApprove = can(role, "approve");
-  const queueCount = (data ?? []).filter((a) =>
-    ["Submitted", "Under Review"].includes(a.status),
-  ).length;
+  const assessmentCount = (data ?? []).filter((a) => a.status === "Submitted").length;
+  const approvalCount = (data ?? []).filter((a) => a.status === "Under Review").length;
 
-  // Tab is local state (responsive) but seeded from / synced to the URL so the
-  // /approvals redirect can deep-link the queue and the view is shareable.
+  const urlTab = searchParams.get("tab");
   const [tab, setTab] = React.useState(
-    canApprove && searchParams.get("tab") === "queue" ? "queue" : "all",
+    canApprove && (urlTab === "assessment" || urlTab === "queue") ? "assessment"
+      : canApprove && urlTab === "approval" ? "approval"
+      : "all",
   );
   const onTab = (t: string) => {
     setTab(t);
-    router.replace(t === "queue" ? "/applications?tab=queue" : "/applications", {
+    router.replace(t === "all" ? "/applications" : `/applications?tab=${t}`, {
       scroll: false,
     });
   };
@@ -51,11 +50,19 @@ export default function ApplicationsPage() {
         <Tabs value={tab} onValueChange={onTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="all">All applications</TabsTrigger>
-            <TabsTrigger value="queue">
+            <TabsTrigger value="assessment">
               Assessment queue
-              {queueCount > 0 && (
+              {assessmentCount > 0 && (
                 <span className="ml-1.5 rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold text-primary-foreground">
-                  {queueCount}
+                  {assessmentCount}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="approval">
+              Approval queue
+              {approvalCount > 0 && (
+                <span className="ml-1.5 rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold text-primary-foreground">
+                  {approvalCount}
                 </span>
               )}
             </TabsTrigger>
@@ -63,8 +70,11 @@ export default function ApplicationsPage() {
           <TabsContent value="all">
             <ApplicationsTable variant="all" />
           </TabsContent>
-          <TabsContent value="queue">
-            <ApplicationsTable variant="queue" />
+          <TabsContent value="assessment">
+            <ApplicationsTable variant="assessment" />
+          </TabsContent>
+          <TabsContent value="approval">
+            <ApplicationsTable variant="approval" />
           </TabsContent>
         </Tabs>
       ) : (

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 export default function ApprovalsRedirect() {
   const router = useRouter();
   React.useEffect(() => {
-    router.replace("/applications?tab=queue");
+    router.replace("/applications?tab=assessment");
   }, [router]);
   return null;
 }
