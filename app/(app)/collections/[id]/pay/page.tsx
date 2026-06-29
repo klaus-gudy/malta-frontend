@@ -3,8 +3,14 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useLoan, useCustomer, useTakePayment } from "@/hooks/queries";
-import { money, schedule } from "@/lib/format";
+import {
+  useLoan,
+  useCustomer,
+  useTakePayment,
+  useLoanSchedule,
+  useLoanCharges,
+} from "@/hooks/queries";
+import { money } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +31,8 @@ export default function ReceivePaymentPage() {
   const router = useRouter();
   const { data: loan, isLoading } = useLoan(params.id);
   const { data: customer } = useCustomer(loan?.customer ?? "");
+  const { data: sched } = useLoanSchedule(params.id);
+  const { data: charges } = useLoanCharges(params.id);
   const takePayment = useTakePayment();
 
   const [amount, setAmount] = React.useState("");
@@ -36,9 +44,14 @@ export default function ReceivePaymentPage() {
   if (isLoading) return <Skeleton className="h-80 max-w-[880px]" />;
   if (!loan) return <div className="text-muted-foreground">Loan not found.</div>;
 
-  const sch = schedule(loan.principal, loan.rate, loan.term, loan.method, loan.disbursed);
-  const nx = sch[loan.paid] || sch[sch.length - 1];
-  const out = sch.slice(loan.paid).reduce((s, r) => s + r.total, 0);
+  const rows = sched ?? [];
+  // Next installment due = the first one not fully paid.
+  const nx = rows.find((r) => r.status !== "Paid") ?? rows[rows.length - 1];
+  const outstandingInstal = rows.reduce((s, r) => s + (r.total - r.paidAmount), 0);
+  const outstandingCharges = (charges ?? [])
+    .filter((c) => c.status === "Outstanding")
+    .reduce((s, c) => s + c.amount, 0);
+  const out = outstandingInstal + outstandingCharges;
   const receiptNo = `RCP-${loan.id.slice(-4)}-${loan.paid + 1}`;
 
   function record() {
@@ -47,12 +60,13 @@ export default function ReceivePaymentPage() {
       return;
     }
     takePayment.mutate(
-      { id: loan!.id, amount: Number(amount) },
+      { id: loan!.id, amount: Number(amount), method, reference },
       {
         onSuccess: () => {
           toast(`Payment of ${money(Number(amount))} received`);
           setDone(true);
         },
+        onError: (e: Error) => toast(e.message || "Could not record payment"),
       },
     );
   }
@@ -115,16 +129,26 @@ export default function ReceivePaymentPage() {
 
           <Card className="px-5 py-[18px]">
             <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.05em] text-[#9a948a]">
-              Installment #{nx.n}
+              {nx ? `Installment #${nx.n}` : "Installment"}
             </div>
             <div className="mb-1.5 flex justify-between text-[12.5px]">
               <span className="text-[#6f6a61]">Due date</span>
-              <span>{new Date(nx.due).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+              <span>
+                {nx
+                  ? new Date(nx.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+                  : "—"}
+              </span>
             </div>
             <div className="mb-1.5 flex justify-between text-[12.5px]">
               <span className="text-[#6f6a61]">Installment due</span>
-              <span className="font-mono font-semibold">{money(nx.total)}</span>
+              <span className="font-mono font-semibold">{money(nx ? nx.total - nx.paidAmount : 0)}</span>
             </div>
+            {outstandingCharges > 0 && (
+              <div className="mb-1.5 flex justify-between text-[12.5px]">
+                <span className="text-[#6f6a61]">Outstanding penalties</span>
+                <span className="font-mono font-semibold text-destructive">{money(outstandingCharges)}</span>
+              </div>
+            )}
             <div className="flex justify-between border-t border-table-border pt-2.5 text-[12.5px]">
               <span className="text-[#6f6a61]">Total outstanding</span>
               <span className="font-mono font-semibold">{money(out)}</span>

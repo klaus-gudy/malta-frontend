@@ -134,3 +134,42 @@ export interface CustomerDocument {
   up: string;
   status: KycStatus;
 }
+
+// ---- Repayment domain (served from the backend) ----
+export type InstallmentStatus = "Due" | "Paid" | "Overdue" | "Partial";
+
+export interface Installment {
+  id: string;
+  loanId: string;
+  n: number;
+  dueDate: string;
+  principal: number;
+  interest: number;
+  fee: number;
+  total: number;
+  balance: number;
+  status: InstallmentStatus;
+  paidAmount: number;
+  paidDate: string;
+}
+
+export interface LoanPayment {
+  id: string;
+  loanId: string;
+  date: string;
+  amount: number;
+  method: string;
+  reference: string;
+}
+
+export type ChargeStatus = "Outstanding" | "Paid" | "Waived";
+
+export interface LoanCharge {
+  id: string;
+  loanId: string;
+  installmentN: number;
+  type: string;
+  amount: number;
+  date: string;
+  status: ChargeStatus;
+}

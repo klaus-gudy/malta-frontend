@@ -2,10 +2,17 @@
 
 import * as React from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useLoan, useCustomer, useProduct } from "@/hooks/queries";
+import {
+  useLoan,
+  useCustomer,
+  useProduct,
+  useLoanSchedule,
+  useLoanPayments,
+  useLoanCharges,
+} from "@/hooks/queries";
 import { useSession } from "@/lib/session";
 import { can } from "@/lib/rbac";
-import { fmtDate, money, schedule } from "@/lib/format";
+import { fmtDate, money } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +38,10 @@ export default function AccountDetailPage() {
   const { data: loan, isLoading } = useLoan(params.id);
   const { data: customer } = useCustomer(loan?.customer ?? "");
   const { data: product } = useProduct(loan?.product ?? "");
+  // Repayment schedule, transactions and charges — served from the backend.
+  const { data: scheduleRows } = useLoanSchedule(params.id);
+  const { data: payments } = useLoanPayments(params.id);
+  const { data: charges } = useLoanCharges(params.id);
 
   function setTab(t: string) {
     router.replace(`/accounts/${params.id}?tab=${t}`, { scroll: false });
@@ -39,36 +50,19 @@ export default function AccountDetailPage() {
   if (isLoading) return <Skeleton className="h-96 max-w-[1180px]" />;
   if (!loan || !product) return <div className="text-muted-foreground">Account not found.</div>;
 
-  const sch = schedule(loan.principal, loan.rate, loan.term, loan.method, loan.disbursed);
-  const paidRows = sch.slice(0, loan.paid);
-  const outstanding = sch.slice(loan.paid).reduce((s, r) => s + r.total, 0);
-  const paidAmt = paidRows.reduce((s, r) => s + r.total, 0);
-  const progress = Math.round((loan.paid / loan.term) * 100);
-  const nx = sch[loan.paid];
-
-  const scheduleRows = sch.map((r, i) => {
-    const status =
-      i < loan.paid ? "Paid" : loan.status === "Overdue" && i === loan.paid ? "Overdue" : "Due";
-    return { ...r, status };
-  });
-
-  const txns = paidRows
-    .map((r, i) => ({
-      date: fmtDate(r.due),
-      ref: `RCP-${loan.id.slice(-4)}-${i + 1}`,
-      method: loan.channel.includes("Bank") ? "Bank" : "Mobile money",
-      amount: money(r.total),
-    }))
-    .reverse();
-
-  const charges =
-    loan.status === "Overdue"
-      ? [{ date: fmtDate(nx ? nx.due : loan.disbursed), type: "Late payment penalty", amount: money(Math.round(nx ? nx.total * 0.05 : 0)) }]
-      : [];
+  const sched = scheduleRows ?? [];
+  const paidCount = sched.filter((r) => r.status === "Paid").length;
+  const repaid = sched.reduce((s, r) => s + r.paidAmount, 0);
+  const outstandingInstal = sched.reduce((s, r) => s + (r.total - r.paidAmount), 0);
+  const outstandingCharges = (charges ?? [])
+    .filter((c) => c.status === "Outstanding")
+    .reduce((s, c) => s + c.amount, 0);
+  const outstanding = outstandingInstal + outstandingCharges;
+  const progress = loan.term ? Math.round((paidCount / loan.term) * 100) : 0;
 
   const stats = [
     { label: "Principal", value: money(loan.principal), color: undefined },
-    { label: "Repaid", value: money(paidAmt), color: "#047857" },
+    { label: "Repaid", value: money(repaid), color: "#047857" },
     { label: "Outstanding", value: money(outstanding), color: undefined },
     { label: "Progress", value: `${progress}%`, color: undefined },
   ];
@@ -124,10 +118,10 @@ export default function AccountDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {scheduleRows.map((r) => (
+                {sched.map((r) => (
                   <TableRow key={r.n}>
                     <TableCell className="font-mono text-xs">{r.n}</TableCell>
-                    <TableCell className="text-xs">{fmtDate(r.due)}</TableCell>
+                    <TableCell className="text-xs">{fmtDate(r.dueDate)}</TableCell>
                     <TableCell className="text-right font-mono text-xs">{money(r.principal)}</TableCell>
                     <TableCell className="text-right font-mono text-xs">{money(r.interest)}</TableCell>
                     <TableCell className="text-right font-mono text-xs font-semibold">{money(r.total)}</TableCell>
@@ -152,19 +146,19 @@ export default function AccountDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {txns.length === 0 ? (
+                {(payments ?? []).length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
                       No payments recorded yet.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  txns.map((t) => (
-                    <TableRow key={t.ref}>
-                      <TableCell className="text-[12.5px]">{t.date}</TableCell>
-                      <TableCell className="font-mono text-xs">{t.ref}</TableCell>
+                  (payments ?? []).map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell className="text-[12.5px]">{fmtDate(t.date)}</TableCell>
+                      <TableCell className="font-mono text-xs">{t.id}</TableCell>
                       <TableCell className="text-[12.5px] text-[#6f6a61]">{t.method}</TableCell>
-                      <TableCell className="text-right font-mono text-[12.5px] font-semibold text-[#047857]">{t.amount}</TableCell>
+                      <TableCell className="text-right font-mono text-[12.5px] font-semibold text-[#047857]">{money(t.amount)}</TableCell>
                     </TableRow>
                   ))
                 )}
@@ -176,18 +170,26 @@ export default function AccountDetailPage() {
         <TabsContent value="charges">
           <Card className="px-5 py-[18px]">
             <div className="mb-3 text-sm font-semibold">Accrued charges &amp; penalties</div>
-            {charges.length === 0 ? (
+            {(charges ?? []).length === 0 ? (
               <div className="py-2 text-[12.5px] text-[#9a948a]">
                 No penalties or additional charges accrued.
               </div>
             ) : (
-              charges.map((ch, i) => (
-                <div key={i} className="flex justify-between border-b border-table-row-border py-2.5 last:border-0">
+              (charges ?? []).map((ch) => (
+                <div key={ch.id} className="flex items-center justify-between border-b border-table-row-border py-2.5 last:border-0">
                   <div>
-                    <div className="text-[13px] font-medium">{ch.type}</div>
-                    <div className="text-[11.5px] text-[#9a948a]">{ch.date}</div>
+                    <div className="text-[13px] font-medium">
+                      {ch.type}
+                      {ch.installmentN > 0 && (
+                        <span className="text-[#9a948a]"> · installment #{ch.installmentN}</span>
+                      )}
+                    </div>
+                    <div className="text-[11.5px] text-[#9a948a]">{fmtDate(ch.date)}</div>
                   </div>
-                  <div className="font-mono text-[13px] font-semibold text-destructive">{ch.amount}</div>
+                  <div className="flex items-center gap-2.5">
+                    <StatusPill status={ch.status} className="px-2 py-px text-[10.5px]" />
+                    <div className="font-mono text-[13px] font-semibold text-destructive">{money(ch.amount)}</div>
+                  </div>
                 </div>
               ))
             )}

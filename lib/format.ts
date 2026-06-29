@@ -50,6 +50,9 @@ const PILLS: Record<string, [string, string]> = {
   Current: ["#047857", "#e3f3eb"],
   Paid: ["#047857", "#e3f3eb"],
   Ready: ["#047857", "#e3f3eb"],
+  Partial: ["#1d4ed8", "#e8eefb"],
+  Outstanding: ["#b91c1c", "#fbeaea"],
+  Waived: ["#6b7280", "#f1efe9"],
 };
 
 export function pill(status: string): { fg: string; bg: string } {

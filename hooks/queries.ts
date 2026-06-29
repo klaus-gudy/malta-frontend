@@ -27,6 +27,9 @@ export const keys = {
   application: (id: string) => ["application", id] as const,
   loans: ["loans"] as const,
   loan: (id: string) => ["loan", id] as const,
+  loanSchedule: (id: string) => ["loanSchedule", id] as const,
+  loanPayments: (id: string) => ["loanPayments", id] as const,
+  loanCharges: (id: string) => ["loanCharges", id] as const,
   users: ["users"] as const,
   audit: (id: string) => ["audit", id] as const,
   documents: (id: string) => ["documents", id] as const,
@@ -71,6 +74,27 @@ export const useLoan = (id: string) =>
   useQuery({
     queryKey: keys.loan(id),
     queryFn: () => api.loan(id),
+    enabled: !!id,
+  });
+
+export const useLoanSchedule = (id: string) =>
+  useQuery({
+    queryKey: keys.loanSchedule(id),
+    queryFn: () => api.loanSchedule(id),
+    enabled: !!id,
+  });
+
+export const useLoanPayments = (id: string) =>
+  useQuery({
+    queryKey: keys.loanPayments(id),
+    queryFn: () => api.loanPayments(id),
+    enabled: !!id,
+  });
+
+export const useLoanCharges = (id: string) =>
+  useQuery({
+    queryKey: keys.loanCharges(id),
+    queryFn: () => api.loanCharges(id),
     enabled: !!id,
   });
 
@@ -269,11 +293,23 @@ export function useDisburse() {
 export function useTakePayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount: number }) =>
-      mutations.takePayment(id, amount),
+    mutationFn: ({
+      id,
+      amount,
+      method,
+      reference,
+    }: {
+      id: string;
+      amount: number;
+      method?: string;
+      reference?: string;
+    }) => mutations.takePayment(id, amount, method, reference),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: keys.loans });
       qc.invalidateQueries({ queryKey: keys.loan(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.loanSchedule(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.loanPayments(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.loanCharges(vars.id) });
     },
   });
 }

@@ -10,8 +10,11 @@ import type {
   ApplicationStatus,
   Customer,
   CustomerDocument,
+  Installment,
   KycStatus,
   Loan,
+  LoanCharge,
+  LoanPayment,
   Product,
   RoleId,
   User,
@@ -86,6 +89,9 @@ export const api = {
     get<Application | null>(`/applications/${id}`, true),
   loans: () => get<Loan[]>("/loans"),
   loan: (id: string) => get<Loan | null>(`/loans/${id}`, true),
+  loanSchedule: (id: string) => get<Installment[]>(`/loans/${id}/schedule`),
+  loanPayments: (id: string) => get<LoanPayment[]>(`/loans/${id}/payments`),
+  loanCharges: (id: string) => get<LoanCharge[]>(`/loans/${id}/charges`),
   users: () => get<User[]>("/users"),
   audit: (id: string) => get<import("./types").AuditEntry[] | null>(
     `/audit/${id}`,
@@ -244,6 +250,11 @@ export const mutations = {
   disburse: (applicationId: string, channel: string): Promise<Loan> =>
     post<Loan>("/loans/disburse", { applicationId, channel }),
 
-  takePayment: (loanId: string, amount: number): Promise<Loan | null> =>
-    post<Loan | null>(`/loans/${loanId}/payments`, { amount }),
+  takePayment: (
+    loanId: string,
+    amount: number,
+    method?: string,
+    reference?: string,
+  ): Promise<Loan | null> =>
+    post<Loan | null>(`/loans/${loanId}/payments`, { amount, method, reference }),
 };
