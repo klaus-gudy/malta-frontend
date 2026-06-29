@@ -77,12 +77,6 @@ export default function CustomerDetailPage() {
     { k: "Next of kin", val: `${customer.nokName} (${customer.nokRelation}) · ${customer.nokPhone}` },
   ];
 
-  const kycCounts = {
-    v: docs?.filter((d) => d.status === "Verified").length ?? 0,
-    p: docs?.filter((d) => d.status === "Pending").length ?? 0,
-    r: docs?.filter((d) => d.status === "Rejected").length ?? 0,
-  };
-
   // Editable profile fields (key, label, input type).
   const editFields: [string, string, string?][] = [
     ["name", "Full name"],
@@ -351,25 +345,6 @@ export default function CustomerDetailPage() {
 
         {/* DOCUMENTS */}
         <TabsContent value="documents">
-          <div className="mb-3.5 flex flex-wrap gap-3">
-            {[
-              { label: "Verified", value: kycCounts.v, color: "#047857" },
-              { label: "Pending", value: kycCounts.p, color: "#b45309" },
-              { label: "Rejected", value: kycCounts.r, color: "#b91c1c" },
-            ].map((s) => (
-              <Card key={s.label} className="min-w-[130px] flex-1 px-4 py-3">
-                <div className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-[#9a948a]">
-                  {s.label}
-                </div>
-                <div
-                  className="mt-1 font-mono text-xl font-semibold"
-                  style={{ color: s.color }}
-                >
-                  {s.value}
-                </div>
-              </Card>
-            ))}
-          </div>
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-table-border px-4 py-3">
               <div className="text-sm font-semibold">
