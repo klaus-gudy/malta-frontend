@@ -27,6 +27,9 @@ export interface UseTableResult<T> {
   multiPage: boolean;
   pages: number[];
   page: number;
+  pageCount: number;
+  pageSize: number;
+  setPageSize: (n: number) => void;
   prev: () => void;
   next: () => void;
 }
@@ -42,6 +45,8 @@ export function useTable<T>(
   pageSize = 8,
 ): UseTableResult<T> {
   const [state, setState] = React.useState<TableState>(initial);
+  // Page size is user-selectable; the argument is just the initial value.
+  const [size, setSize] = React.useState(pageSize);
 
   const patch = React.useCallback(
     (p: Partial<TableState>, resetPage = true) =>
@@ -55,10 +60,10 @@ export function useTable<T>(
   );
 
   const total = filtered.length;
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const pageCount = Math.max(1, Math.ceil(total / size));
   const page = Math.min(state.page, pageCount);
-  const start = (page - 1) * pageSize;
-  const rows = filtered.slice(start, start + pageSize);
+  const start = (page - 1) * size;
+  const rows = filtered.slice(start, start + size);
 
   return {
     state,
@@ -67,15 +72,25 @@ export function useTable<T>(
     setTo: (v) => patch({ to: v }),
     setStatus: (v) => patch({ status: v }),
     setPage: (n) => patch({ page: n }, false),
-    clear: () => setState(initial),
+    clear: () => {
+      setState(initial);
+      setSize(pageSize);
+    },
     rows,
     total,
     showing: total
-      ? `${start + 1}–${Math.min(start + pageSize, total)} of ${total}`
+      ? `${start + 1}–${Math.min(start + size, total)} of ${total}`
       : "0 of 0",
     multiPage: pageCount > 1,
     pages: Array.from({ length: pageCount }, (_, i) => i + 1),
     page,
+    pageCount,
+    pageSize: size,
+    // Changing page size returns to the first page so the view stays sensible.
+    setPageSize: (n) => {
+      setSize(n);
+      patch({ page: 1 }, false);
+    },
     prev: () => patch({ page: Math.max(1, page - 1) }, false),
     next: () => patch({ page: Math.min(pageCount, page + 1) }, false),
   };
