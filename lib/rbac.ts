@@ -28,7 +28,7 @@ export interface NavDef {
   label: string;
   icon: string;
   roles: RoleId[];
-  badgePage?: "approvals" | "disbursements" | "collections";
+  badgePage?: "disbursements";
 }
 
 export const navDef: NavDef[] = [
@@ -36,8 +36,7 @@ export const navDef: NavDef[] = [
   { page: "customers", href: "/customers", label: "Customers", icon: "☻", roles: ["admin", "officer", "manager", "operations"] },
   { page: "applications", href: "/applications", label: "Loan Applications", icon: "❏", roles: ["admin", "officer", "manager"] },
   { page: "disbursements", href: "/disbursements", label: "Disbursements", icon: "⇄", roles: ["admin", "operations", "manager"], badgePage: "disbursements" },
-  { page: "accounts", href: "/accounts", label: "Loan Accounts", icon: "❑", roles: ["admin", "officer", "manager", "operations"] },
-  { page: "collections", href: "/collections", label: "Collections", icon: "₵", roles: ["admin", "cashier", "officer", "manager"], badgePage: "collections" },
+  { page: "accounts", href: "/accounts", label: "Loan Accounts", icon: "❑", roles: ["admin", "officer", "manager", "operations", "cashier"] },
   { page: "products", href: "/products", label: "Loan Products", icon: "⚙", roles: ["admin", "manager"] },
   { page: "users", href: "/users", label: "User Management", icon: "⚇", roles: ["admin"] },
 ];
