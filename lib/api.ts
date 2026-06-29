@@ -160,9 +160,26 @@ export const auth = {
     post<AuthResult>("/auth/login", { username, password }),
 };
 
+export interface UploadDocumentInput {
+  name: string;
+  content: string;
+  fileName?: string;
+}
+
 export const mutations = {
   createCustomer: (input: NewCustomerInput): Promise<Customer> =>
     post<Customer>("/customers", input),
+
+  updateCustomer: (
+    id: string,
+    input: Partial<NewCustomerInput> & { status?: "Active" | "Inactive" },
+  ): Promise<Customer> => patch<Customer>(`/customers/${id}`, input),
+
+  uploadDocument: (
+    custId: string,
+    input: UploadDocumentInput,
+  ): Promise<CustomerDocument> =>
+    post<CustomerDocument>(`/customers/${custId}/documents`, input),
 
   createApplication: (
     input: {

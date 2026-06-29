@@ -99,6 +99,33 @@ export function useCreateCustomer() {
   });
 }
 
+export function useUpdateCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: Parameters<typeof mutations.updateCustomer>[1];
+    }) => mutations.updateCustomer(id, input),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: keys.customers });
+      qc.invalidateQueries({ queryKey: keys.customer(vars.id) });
+    },
+  });
+}
+
+export function useUploadDocument(custId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Parameters<typeof mutations.uploadDocument>[1]) =>
+      mutations.uploadDocument(custId, input),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: keys.documents(custId) }),
+  });
+}
+
 export function useCreateApplication() {
   const qc = useQueryClient();
   return useMutation({

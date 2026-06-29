@@ -10,10 +10,13 @@ import {
   useLoans,
   useProducts,
   useSetDocStatus,
+  useUpdateCustomer,
+  useUploadDocument,
 } from "@/hooks/queries";
 import { fmtDate, initials, money } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusPill } from "@/components/malta/status-pill";
@@ -31,6 +34,16 @@ export default function CustomerDetailPage() {
   const { data: products } = useProducts();
   const { data: docs } = useDocuments(params.id);
   const setDoc = useSetDocStatus(params.id);
+  const update = useUpdateCustomer();
+  const upload = useUploadDocument(params.id);
+
+  // Profile edit state.
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState<Record<string, string>>({});
+  // Document upload state.
+  const [uploadOpen, setUploadOpen] = React.useState(false);
+  const [docName, setDocName] = React.useState("");
+  const [docFile, setDocFile] = React.useState<File | null>(null);
 
   function setTab(t: string) {
     router.replace(`/customers/${params.id}?tab=${t}`, { scroll: false });
@@ -66,6 +79,104 @@ export default function CustomerDetailPage() {
     p: docs?.filter((d) => d.status === "Pending").length ?? 0,
     r: docs?.filter((d) => d.status === "Rejected").length ?? 0,
   };
+
+  // Editable profile fields (key, label, input type).
+  const editFields: [string, string, string?][] = [
+    ["name", "Full name"],
+    ["phone", "Phone"],
+    ["email", "Email"],
+    ["nida", "National ID (NIDA)"],
+    ["dob", "Date of birth", "date"],
+    ["gender", "Gender"],
+    ["region", "Region"],
+    ["ward", "Ward"],
+    ["address", "Address"],
+    ["occupation", "Occupation"],
+    ["business", "Business / employer"],
+    ["monthlyIncome", "Monthly income (TZS)"],
+    ["nokName", "Next of kin — name"],
+    ["nokRelation", "Next of kin — relationship"],
+    ["nokPhone", "Next of kin — phone"],
+  ];
+
+  function startEdit() {
+    setDraft({
+      name: customer!.name,
+      phone: customer!.phone,
+      email: customer!.email,
+      nida: customer!.nida,
+      dob: customer!.dob,
+      gender: customer!.gender,
+      region: customer!.region,
+      ward: customer!.ward,
+      address: customer!.address,
+      occupation: customer!.occupation,
+      business: customer!.business,
+      monthlyIncome: String(customer!.monthlyIncome),
+      nokName: customer!.nokName,
+      nokRelation: customer!.nokRelation,
+      nokPhone: customer!.nokPhone,
+    });
+    setEditing(true);
+  }
+
+  function saveEdit() {
+    if (!draft.name?.trim()) {
+      toast("Name is required");
+      return;
+    }
+    // Send only non-empty fields so blank values don't trip backend validation
+    // (e.g. an empty email). monthlyIncome is always sent as a number.
+    const input: Record<string, string | number> = {
+      monthlyIncome: Number(draft.monthlyIncome || 0),
+    };
+    for (const [k, v] of Object.entries(draft)) {
+      if (k !== "monthlyIncome" && v.trim() !== "") input[k] = v;
+    }
+    update.mutate(
+      {
+        id: customer!.id,
+        input: input as Parameters<typeof update.mutate>[0]["input"],
+      },
+      {
+        onSuccess: () => {
+          toast("Profile updated");
+          setEditing(false);
+        },
+        onError: (e: Error) => toast(e.message || "Could not update profile"),
+      },
+    );
+  }
+
+  function submitUpload() {
+    if (!docName.trim()) {
+      toast("Enter a document name");
+      return;
+    }
+    if (!docFile) {
+      toast("Choose a file to upload");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () =>
+      upload.mutate(
+        {
+          name: docName.trim(),
+          content: String(reader.result),
+          fileName: docFile.name,
+        },
+        {
+          onSuccess: () => {
+            toast("Document uploaded — pending verification");
+            setUploadOpen(false);
+            setDocName("");
+            setDocFile(null);
+          },
+          onError: (e: Error) => toast(e.message || "Upload failed"),
+        },
+      );
+    reader.readAsDataURL(docFile);
+  }
 
   return (
     <div className="max-w-[1180px] animate-fade-up">
@@ -108,14 +219,53 @@ export default function CustomerDetailPage() {
         <TabsContent value="overview">
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1.4fr_1fr]">
             <Card className="px-5 py-[18px]">
-              <div className="mb-3.5 text-sm font-semibold">Profile details</div>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3.5">
-                {facts.map((f) => (
-                  <Fact key={f.k} k={f.k}>
-                    {f.val}
-                  </Fact>
-                ))}
+              <div className="mb-3.5 flex items-center justify-between">
+                <div className="text-sm font-semibold">Profile details</div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => (editing ? setEditing(false) : startEdit())}
+                >
+                  {editing ? "Close" : "✎ Edit profile"}
+                </Button>
               </div>
+              {editing ? (
+                <>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {editFields.map(([key, label, type]) => (
+                      <label key={key} className="block">
+                        <span className="text-[11.5px] font-semibold text-[#6f6a61]">
+                          {label}
+                        </span>
+                        <Input
+                          className="mt-[5px] h-[36px]"
+                          type={type ?? "text"}
+                          value={draft[key] ?? ""}
+                          onChange={(e) =>
+                            setDraft((d) => ({ ...d, [key]: e.target.value }))
+                          }
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex gap-2.5 border-t border-table-border pt-3.5">
+                    <Button onClick={saveEdit} disabled={update.isPending}>
+                      {update.isPending ? "Saving…" : "Save changes"}
+                    </Button>
+                    <Button variant="outline" onClick={() => setEditing(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3.5">
+                  {facts.map((f) => (
+                    <Fact key={f.k} k={f.k}>
+                      {f.val}
+                    </Fact>
+                  ))}
+                </div>
+              )}
             </Card>
             <Card className="px-[18px] py-4">
               <div className="mb-3 text-sm font-semibold">
@@ -222,10 +372,55 @@ export default function CustomerDetailPage() {
               <div className="text-sm font-semibold">
                 Identity &amp; supporting documents
               </div>
-              <Button variant="outline" size="sm">
-                ↑ Upload document
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setUploadOpen((o) => !o)}
+              >
+                {uploadOpen ? "Close" : "↑ Upload document"}
               </Button>
             </div>
+
+            {uploadOpen ? (
+              <div className="flex flex-wrap items-end gap-3 border-b border-table-border bg-surface-subtle px-4 py-3.5">
+                <label className="block min-w-[200px] flex-1">
+                  <span className="text-[11.5px] font-semibold text-[#6f6a61]">
+                    Document name
+                  </span>
+                  <Input
+                    className="mt-[5px] h-[36px]"
+                    placeholder="e.g. Bank statement"
+                    value={docName}
+                    onChange={(e) => setDocName(e.target.value)}
+                  />
+                </label>
+                <label className="block min-w-[200px] flex-1">
+                  <span className="text-[11.5px] font-semibold text-[#6f6a61]">
+                    File
+                  </span>
+                  <input
+                    type="file"
+                    className="mt-[7px] block w-full text-[12.5px] text-[#6f6a61] file:mr-3 file:rounded-md file:border file:border-input file:bg-card file:px-2.5 file:py-1.5 file:text-[12px] file:font-medium hover:file:bg-secondary"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] ?? null;
+                      setDocFile(f);
+                      if (f && !docName.trim())
+                        setDocName(f.name.replace(/\.[^.]+$/, ""));
+                    }}
+                  />
+                </label>
+                <Button onClick={submitUpload} disabled={upload.isPending}>
+                  {upload.isPending ? "Uploading…" : "Upload"}
+                </Button>
+              </div>
+            ) : null}
+
+            {docs?.length === 0 ? (
+              <div className="px-4 py-8 text-center text-xs text-muted-foreground">
+                No documents yet. Use “Upload document” to add one.
+              </div>
+            ) : null}
+
             {docs?.map((doc) => (
               <div
                 key={doc.id}
