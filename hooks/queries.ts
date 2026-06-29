@@ -90,6 +90,13 @@ export const useDocuments = (custId: string) =>
     enabled: !!custId,
   });
 
+export const useDocumentContent = (docId: string | null) =>
+  useQuery({
+    queryKey: ["documentContent", docId] as const,
+    queryFn: () => api.documentContent(docId as string),
+    enabled: !!docId,
+  });
+
 // ---------- MUTATIONS ----------
 export function useCreateCustomer() {
   const qc = useQueryClient();

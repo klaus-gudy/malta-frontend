@@ -93,6 +93,10 @@ export const api = {
   ),
   documents: (custId: string) =>
     get<CustomerDocument[]>(`/customers/${custId}/documents`),
+  documentContent: (docId: string) =>
+    get<{ id: string; type: string; file: string; content: string }>(
+      `/customers/documents/${docId}/content`,
+    ),
 };
 
 // ---------- MUTATIONS ----------

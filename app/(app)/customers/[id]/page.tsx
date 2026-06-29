@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusPill } from "@/components/malta/status-pill";
 import { Fact } from "@/components/malta/form";
+import { DocumentPreview } from "@/components/malta/document-preview";
 
 export default function CustomerDetailPage() {
   const params = useParams<{ id: string }>();
@@ -44,6 +45,8 @@ export default function CustomerDetailPage() {
   const [uploadOpen, setUploadOpen] = React.useState(false);
   const [docName, setDocName] = React.useState("");
   const [docFile, setDocFile] = React.useState<File | null>(null);
+  // Document currently being previewed in the modal.
+  const [previewId, setPreviewId] = React.useState<string | null>(null);
 
   function setTab(t: string) {
     router.replace(`/customers/${params.id}?tab=${t}`, { scroll: false });
@@ -435,6 +438,13 @@ export default function CustomerDetailPage() {
                     {doc.file} · {doc.size} · {doc.up}
                   </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPreviewId(doc.id)}
+                >
+                  ⤢ Preview
+                </Button>
                 <StatusPill status={doc.status} />
                 {doc.status === "Pending" ? (
                   <div className="flex gap-1.5">
@@ -483,6 +493,13 @@ export default function CustomerDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {previewId ? (
+        <DocumentPreview
+          docId={previewId}
+          onClose={() => setPreviewId(null)}
+        />
+      ) : null}
     </div>
   );
 }
