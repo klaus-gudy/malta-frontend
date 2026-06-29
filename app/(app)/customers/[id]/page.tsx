@@ -7,6 +7,7 @@ import {
   useApplications,
   useCustomer,
   useDocuments,
+  useKycRequirements,
   useLoans,
   useProducts,
   useSetDocStatus,
@@ -23,6 +24,17 @@ import { StatusPill } from "@/components/malta/status-pill";
 import { Fact } from "@/components/malta/form";
 import { DocumentPreview } from "@/components/malta/document-preview";
 
+// Friendly labels for the profile fields required before KYC verification.
+const KYC_FIELD_LABELS: Record<string, string> = {
+  name: "Full name",
+  phone: "Phone",
+  nida: "National ID (NIDA)",
+  region: "Region",
+  address: "Address",
+  occupation: "Occupation",
+  monthlyIncome: "Monthly income",
+};
+
 export default function CustomerDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -34,6 +46,7 @@ export default function CustomerDetailPage() {
   const { data: applications } = useApplications();
   const { data: products } = useProducts();
   const { data: docs } = useDocuments(params.id);
+  const { data: kycReq } = useKycRequirements(params.id);
   const setDoc = useSetDocStatus(params.id);
   const update = useUpdateCustomer();
   const upload = useUploadDocument(params.id);
@@ -345,6 +358,46 @@ export default function CustomerDetailPage() {
 
         {/* DOCUMENTS */}
         <TabsContent value="documents">
+          {kycReq ? (
+            kycReq.kyc === "Verified" ? (
+              <div className="mb-3.5 rounded-md border border-[#b8dcc9] bg-[#e6f4ee] px-3.5 py-2.5 text-[12.5px] text-[#0c6b48]">
+                <span className="font-semibold">KYC verified</span> — all required
+                profile details are complete and every document is verified.
+              </div>
+            ) : (
+              <div className="mb-3.5 rounded-md border border-[#e7c5c5] bg-[#fbeaea] px-3.5 py-3 text-[12.5px] text-destructive">
+                <div className="mb-1 font-semibold">
+                  KYC {kycReq.kyc.toLowerCase()} — to verify this customer:
+                </div>
+                <ul className="list-disc space-y-0.5 pl-4">
+                  {kycReq.missingFields.length > 0 && (
+                    <li>
+                      Complete these profile details:{" "}
+                      {kycReq.missingFields
+                        .map((f) => KYC_FIELD_LABELS[f] ?? f)
+                        .join(", ")}
+                      .
+                    </li>
+                  )}
+                  {kycReq.totalDocuments === 0 && (
+                    <li>Upload the customer&apos;s identity documents.</li>
+                  )}
+                  {kycReq.rejectedDocuments > 0 && (
+                    <li>
+                      Re-upload {kycReq.rejectedDocuments} rejected document
+                      {kycReq.rejectedDocuments > 1 ? "s" : ""}.
+                    </li>
+                  )}
+                  {kycReq.pendingDocuments > 0 && (
+                    <li>
+                      Verify {kycReq.pendingDocuments} pending document
+                      {kycReq.pendingDocuments > 1 ? "s" : ""} below.
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )
+          ) : null}
           <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-table-border px-4 py-3">
               <div className="text-sm font-semibold">

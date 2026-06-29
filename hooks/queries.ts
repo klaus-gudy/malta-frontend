@@ -30,6 +30,7 @@ export const keys = {
   users: ["users"] as const,
   audit: (id: string) => ["audit", id] as const,
   documents: (id: string) => ["documents", id] as const,
+  kycRequirements: (id: string) => ["kycRequirements", id] as const,
 };
 
 // ---------- QUERIES ----------
@@ -90,6 +91,13 @@ export const useDocuments = (custId: string) =>
     enabled: !!custId,
   });
 
+export const useKycRequirements = (custId: string) =>
+  useQuery({
+    queryKey: keys.kycRequirements(custId),
+    queryFn: () => api.kycRequirements(custId),
+    enabled: !!custId,
+  });
+
 export const useDocumentContent = (docId: string | null) =>
   useQuery({
     queryKey: ["documentContent", docId] as const,
@@ -128,8 +136,13 @@ export function useUploadDocument(custId: string) {
   return useMutation({
     mutationFn: (input: Parameters<typeof mutations.uploadDocument>[1]) =>
       mutations.uploadDocument(custId, input),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: keys.documents(custId) }),
+    // Uploading affects KYC (a new doc is unverified) — refresh the customer too.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.documents(custId) });
+      qc.invalidateQueries({ queryKey: keys.customer(custId) });
+      qc.invalidateQueries({ queryKey: keys.customers });
+      qc.invalidateQueries({ queryKey: keys.kycRequirements(custId) });
+    },
   });
 }
 
@@ -181,7 +194,13 @@ export function useSetDocStatus(custId: string) {
       docId: string;
       status: "Verified" | "Rejected";
     }) => mutations.setDocStatus(docId, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.documents(custId) }),
+    // Verifying/rejecting a doc may flip KYC — refresh the customer too.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.documents(custId) });
+      qc.invalidateQueries({ queryKey: keys.customer(custId) });
+      qc.invalidateQueries({ queryKey: keys.customers });
+      qc.invalidateQueries({ queryKey: keys.kycRequirements(custId) });
+    },
   });
 }
 

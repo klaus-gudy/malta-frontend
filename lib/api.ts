@@ -97,7 +97,17 @@ export const api = {
     get<{ id: string; type: string; file: string; content: string }>(
       `/customers/documents/${docId}/content`,
     ),
+  kycRequirements: (custId: string) =>
+    get<KycRequirements>(`/customers/${custId}/kyc-requirements`),
 };
+
+export interface KycRequirements {
+  kyc: KycStatus;
+  missingFields: string[];
+  totalDocuments: number;
+  pendingDocuments: number;
+  rejectedDocuments: number;
+}
 
 // ---------- MUTATIONS ----------
 export interface NewCustomerInput {
