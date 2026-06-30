@@ -352,12 +352,7 @@ export default function CustomerDetailPage() {
         <TabsContent value="accounts">
           <Card className="px-[18px] py-4">
             <div className="mb-3 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-semibold">Disbursement accounts</div>
-                <div className="mt-0.5 text-[11.5px] text-[#9a948a]">
-                  Channels &amp; account numbers on file for this customer — used to pick a disbursement destination during loan disbursement.
-                </div>
-              </div>
+              <div className="text-sm font-semibold">Customer accounts</div>
               <Button variant="outline" size="sm" onClick={() => setAcctOpen((o) => !o)}>
                 {acctOpen ? "Close" : "+ Add account"}
               </Button>
@@ -402,7 +397,20 @@ export default function CustomerDetailPage() {
                     </div>
                     <div className="font-mono text-[11.5px] text-[#9a948a]">{acct.accountNumber}{acct.accountName ? ` - ${acct.accountName}` : ""}</div>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-[11px] text-destructive" onClick={() => deleteAccount.mutate(acct.id, { onSuccess: () => toast("Account removed") })}>Remove</Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[11px] text-destructive"
+                    disabled={deleteAccount.isPending}
+                    onClick={() =>
+                      deleteAccount.mutate(acct.id, {
+                        onSuccess: () => toast("Account removed"),
+                        onError: (e: Error) => toast(e.message || "Could not remove account"),
+                      })
+                    }
+                  >
+                    Remove
+                  </Button>
                 </div>
               ))
             )}

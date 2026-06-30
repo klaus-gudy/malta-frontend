@@ -67,8 +67,13 @@ async function request<T>(
     throw new ApiError(res.status, detail);
   }
 
-  if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
+  // 204, or a 200 with an empty body (e.g. DELETE handlers returning void, or
+  // GET endpoints that return null when there's nothing), have nothing to
+  // parse. Return null rather than undefined: React Query rejects undefined as
+  // query data, and void callers ignore the value either way.
+  if (res.status === 204) return null as T;
+  const text = await res.text();
+  return (text ? JSON.parse(text) : null) as T;
 }
 
 const get = <T>(path: string, allow404 = false) =>
