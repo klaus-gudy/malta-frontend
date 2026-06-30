@@ -103,6 +103,8 @@ export const api = {
   loanPayments: (id: string) => get<LoanPayment[]>(`/loans/${id}/payments`),
   loanCharges: (id: string) => get<LoanCharge[]>(`/loans/${id}/charges`),
   loanSummary: (id: string) => get<LoanSummary>(`/loans/${id}/summary`),
+  loanActivity: (id: string) =>
+    get<import("./types").AuditEntry[]>(`/loans/${id}/activity`),
   users: () => get<User[]>("/users"),
   audit: (id: string) => get<import("./types").AuditEntry[] | null>(
     `/audit/${id}`,
@@ -118,6 +120,10 @@ export const api = {
     get<KycRequirements>(`/customers/${custId}/kyc-requirements`),
   customerAccounts: (custId: string) =>
     get<CustomerAccount[]>(`/customers/${custId}/accounts`),
+  dashboard: (from: string, to: string) =>
+    get<import("./types").DashboardOverview>(
+      `/dashboard?from=${from}&to=${to}`,
+    ),
 };
 
 export interface KycRequirements {
@@ -231,8 +237,9 @@ export const mutations = {
   patchApplication: (
     id: string,
     patch_: Partial<Application>,
+    role?: RoleId,
   ): Promise<Application | null> =>
-    patch<Application | null>(`/applications/${id}`, patch_),
+    patch<Application | null>(`/applications/${id}`, { ...patch_, role }),
 
   setKyc: (custId: string, status: KycStatus): Promise<Customer | null> =>
     patch<Customer | null>(`/customers/${custId}/kyc`, { status }),
@@ -243,13 +250,14 @@ export const mutations = {
   ): Promise<void> =>
     patch<void>(`/customers/documents/${docId}/status`, { status }),
 
-  createProduct: (input: NewProductInput): Promise<Product> =>
-    post<Product>("/products", input),
+  createProduct: (input: NewProductInput, role?: RoleId): Promise<Product> =>
+    post<Product>("/products", { ...input, role }),
 
   updateProduct: (
     id: string,
     input: Partial<NewProductInput>,
-  ): Promise<Product> => patch<Product>(`/products/${id}`, input),
+    role?: RoleId,
+  ): Promise<Product> => patch<Product>(`/products/${id}`, { ...input, role }),
 
   createUser: (input: NewUserInput): Promise<CreatedUser> =>
     post<CreatedUser>("/users", input),
@@ -260,16 +268,26 @@ export const mutations = {
   toggleUser: (id: string): Promise<User | null> =>
     patch<User | null>(`/users/${id}/toggle`),
 
-  disburse: (applicationId: string, channel: string): Promise<Loan> =>
-    post<Loan>("/loans/disburse", { applicationId, channel }),
+  disburse: (
+    applicationId: string,
+    channel: string,
+    role?: RoleId,
+  ): Promise<Loan> =>
+    post<Loan>("/loans/disburse", { applicationId, channel, role }),
 
   takePayment: (
     loanId: string,
     amount: number,
     method?: string,
     reference?: string,
+    role?: RoleId,
   ): Promise<Loan | null> =>
-    post<Loan | null>(`/loans/${loanId}/payments`, { amount, method, reference }),
+    post<Loan | null>(`/loans/${loanId}/payments`, {
+      amount,
+      method,
+      reference,
+      role,
+    }),
 
   addCustomerAccount: (
     custId: string,

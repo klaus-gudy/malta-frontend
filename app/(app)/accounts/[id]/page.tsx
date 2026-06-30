@@ -10,6 +10,7 @@ import {
   useLoanPayments,
   useLoanCharges,
   useLoanSummary,
+  useLoanActivity,
 } from "@/hooks/queries";
 import { useSession } from "@/lib/session";
 import { can } from "@/lib/rbac";
@@ -20,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusPill } from "@/components/malta/status-pill";
+import { ActivityTimeline } from "@/components/malta/activity-timeline";
 import {
   Table,
   TableBody,
@@ -44,6 +46,7 @@ export default function AccountDetailPage() {
   const { data: payments } = useLoanPayments(params.id);
   const { data: charges } = useLoanCharges(params.id);
   const { data: summary } = useLoanSummary(params.id);
+  const { data: activity } = useLoanActivity(params.id);
 
   function setTab(t: string) {
     router.replace(`/accounts/${params.id}?tab=${t}`, { scroll: false });
@@ -124,6 +127,7 @@ export default function AccountDetailPage() {
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="charges">Charges</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
 
@@ -217,6 +221,19 @@ export default function AccountDetailPage() {
                 </div>
               ))
             )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="activity">
+          <Card className="px-5 py-[18px]">
+            <div className="mb-1 text-sm font-semibold">Loan lifecycle</div>
+            <div className="mb-4 text-[12px] text-[#9a948a]">
+              Origination to repayment — who acted and when.
+            </div>
+            <ActivityTimeline
+              entries={activity ?? []}
+              empty="No activity recorded for this loan yet."
+            />
           </Card>
         </TabsContent>
 

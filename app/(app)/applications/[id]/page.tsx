@@ -97,7 +97,7 @@ export default function ApplicationDetailPage() {
                 variant="outline"
                 onClick={() =>
                   patch.mutate(
-                    { id: app.id, patch: { status: "Under Review" } },
+                    { id: app.id, patch: { status: "Under Review" }, role },
                     { onSuccess: () => toast("Moved to Under Review") },
                   )
                 }
@@ -109,7 +109,7 @@ export default function ApplicationDetailPage() {
                 className="border-[#e7c5c5] text-destructive"
                 onClick={() =>
                   patch.mutate(
-                    { id: app.id, patch: { status: "Rejected" } },
+                    { id: app.id, patch: { status: "Rejected" }, role },
                     { onSuccess: () => toast("Application rejected") },
                   )
                 }
@@ -125,7 +125,7 @@ export default function ApplicationDetailPage() {
                 className="border-[#e7c5c5] text-destructive"
                 onClick={() =>
                   patch.mutate(
-                    { id: app.id, patch: { status: "Rejected" } },
+                    { id: app.id, patch: { status: "Rejected" }, role },
                     { onSuccess: () => toast("Application rejected") },
                   )
                 }
@@ -136,7 +136,7 @@ export default function ApplicationDetailPage() {
                 className="bg-[#047857]"
                 onClick={() =>
                   patch.mutate(
-                    { id: app.id, patch: { status: "Approved" } },
+                    { id: app.id, patch: { status: "Approved" }, role },
                     {
                       onSuccess: () => {
                         toast("Application approved");

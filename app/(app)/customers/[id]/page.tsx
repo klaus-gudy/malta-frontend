@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   useApplications,
+  useAudit,
   useCustomer,
   useCustomerAccounts,
   useAddCustomerAccount,
@@ -33,6 +34,7 @@ import {
 import { StatusPill } from "@/components/malta/status-pill";
 import { Fact } from "@/components/malta/form";
 import { DocumentPreview } from "@/components/malta/document-preview";
+import { ActivityTimeline } from "@/components/malta/activity-timeline";
 
 // Friendly labels for the profile fields required before KYC verification.
 const KYC_FIELD_LABELS: Record<string, string> = {
@@ -63,6 +65,7 @@ export default function CustomerDetailPage() {
   const { data: accounts } = useCustomerAccounts(params.id);
   const addAccount = useAddCustomerAccount(params.id);
   const deleteAccount = useDeleteCustomerAccount(params.id);
+  const { data: activity } = useAudit(params.id);
 
   // Profile edit state.
   const [editing, setEditing] = React.useState(false);
@@ -572,13 +575,11 @@ export default function CustomerDetailPage() {
         {/* ACTIVITY */}
         <TabsContent value="activity">
           <Card className="px-5 py-[18px]">
-            <div className="mb-3 text-sm font-semibold">Activity timeline</div>
-            <div className="text-[13px] leading-[1.8] text-[#6f6a61]">
-              <div>● Profile created — {fmtDate(customer.joined)}</div>
-              <div>● KYC documents uploaded</div>
-              <div>● Loan application submitted</div>
-              <div>● Repayments recorded against active loan</div>
-            </div>
+            <div className="mb-4 text-sm font-semibold">Activity timeline</div>
+            <ActivityTimeline
+              entries={activity ?? []}
+              empty="No activity recorded for this customer yet."
+            />
           </Card>
         </TabsContent>
       </Tabs>

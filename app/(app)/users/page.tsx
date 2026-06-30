@@ -1,9 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useUsers, useToggleUser } from "@/hooks/queries";
+import { useUsers } from "@/hooks/queries";
 import { useTable } from "@/hooks/use-table";
 import { roleMeta } from "@/lib/rbac";
 import type { User } from "@/lib/types";
@@ -36,24 +34,7 @@ function filterUser(u: User, s: { q: string; status: string }) {
 export default function UsersPage() {
   const router = useRouter();
   const { data } = useUsers();
-  const toggle = useToggleUser();
   const table = useTable<User>(data, filterUser);
-  // Track which row's status change is in flight so only that button disables.
-  const [pendingId, setPendingId] = React.useState<string | null>(null);
-
-  function onToggle(u: User) {
-    const next = u.status === "Active" ? "deactivate" : "activate";
-    setPendingId(u.id);
-    toggle.mutate(u.id, {
-      onSuccess: (updated) =>
-        toast(
-          `${u.name} ${updated?.status === "Active" ? "activated" : "deactivated"}`,
-        ),
-      onError: (e: Error) =>
-        toast(e.message || `Could not ${next} ${u.name}`),
-      onSettled: () => setPendingId(null),
-    });
-  }
 
   return (
     <div className="max-w-[1340px] animate-fade-up">
@@ -75,12 +56,15 @@ export default function UsersPage() {
               <TableHead>Branch</TableHead>
               <TableHead>Last active</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {table.rows.map((u) => (
-              <TableRow key={u.id}>
+              <TableRow
+                key={u.id}
+                onClick={() => router.push(`/users/${u.id}`)}
+                className="cursor-pointer hover:bg-surface-subtle"
+              >
                 <TableCell>
                   <div className="text-[12.5px] font-semibold">{u.name}</div>
                   <div className="font-mono text-[11px] text-[#9a948a]">{u.email}</div>
@@ -89,25 +73,6 @@ export default function UsersPage() {
                 <TableCell className="text-[12.5px] text-[#6f6a61]">{u.branch}</TableCell>
                 <TableCell className="font-mono text-xs text-[#6f6a61]">{u.last}</TableCell>
                 <TableCell><StatusPill status={u.status} /></TableCell>
-                <TableCell className="text-right">
-                  <div className="inline-flex gap-1.5">
-                    <Button variant="outline" size="sm" onClick={() => router.push(`/users/${u.id}/edit`)}>
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={pendingId === u.id}
-                      onClick={() => onToggle(u)}
-                    >
-                      {pendingId === u.id
-                        ? "…"
-                        : u.status === "Active"
-                          ? "Deactivate"
-                          : "Activate"}
-                    </Button>
-                  </div>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -116,6 +116,43 @@ export interface AuditEntry {
   time: string;
 }
 
+export interface DashboardMetrics {
+  outstanding: number;
+  activeLoans: number;
+  pendingApprovals: number;
+  collected: number;
+  receipts: number;
+  newApplications: number;
+  disbursedCount: number;
+  disbursedAmount: number;
+}
+
+export interface ProductPerformance {
+  id: string;
+  name: string;
+  category: string;
+  applications: number;
+  activeLoans: number;
+  disbursed: number;
+}
+
+export interface DashboardRecentApplication {
+  id: string;
+  customer: string;
+  product: string;
+  amount: number;
+  status: ApplicationStatus;
+  created: string;
+  officer: string;
+}
+
+export interface DashboardOverview {
+  metrics: DashboardMetrics;
+  productPerformance: ProductPerformance[];
+  recentApplications: DashboardRecentApplication[];
+  recentActivity: AuditEntry[];
+}
+
 export interface Database {
   customers: Customer[];
   products: Product[];

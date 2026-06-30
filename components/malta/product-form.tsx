@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { Product } from "@/lib/types";
 import { useCreateProduct, useUpdateProduct } from "@/hooks/queries";
+import { useSession } from "@/lib/session";
 import type { NewProductInput } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ const freqOpts = ["Weekly", "Bi-weekly", "Monthly"];
 
 export function ProductForm({ product }: { product?: Product | null }) {
   const router = useRouter();
+  const { role } = useSession();
   const title = product ? `Edit · ${product.name}` : "New loan product";
 
   const [form, setForm] = React.useState<Record<string, string>>({
@@ -155,8 +157,8 @@ export function ProductForm({ product }: { product?: Product | null }) {
           e.message ? e.message.split(", ") : ["Could not save product"],
         ),
     };
-    if (product) updateProduct.mutate({ id: product.id, input }, opts);
-    else createProduct.mutate(input, opts);
+    if (product) updateProduct.mutate({ id: product.id, input, role }, opts);
+    else createProduct.mutate({ input, role }, opts);
   }
 
   const ic = "h-[38px]";

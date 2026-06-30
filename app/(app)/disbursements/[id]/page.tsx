@@ -60,7 +60,7 @@ export default function DisbursementDetailPage() {
     }
     const channel = `${selectedAccount.channel} · ${selectedAccount.accountNumber}`;
     disburse.mutate(
-      { id: app!.id, channel },
+      { id: app!.id, channel, role },
       {
         onSuccess: () => {
           toast(`Loan disbursed to ${selectedAccount.channel} — ${selectedAccount.accountNumber}`);

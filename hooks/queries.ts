@@ -31,11 +31,13 @@ export const keys = {
   loanPayments: (id: string) => ["loanPayments", id] as const,
   loanCharges: (id: string) => ["loanCharges", id] as const,
   loanSummary: (id: string) => ["loanSummary", id] as const,
+  loanActivity: (id: string) => ["loanActivity", id] as const,
   users: ["users"] as const,
   audit: (id: string) => ["audit", id] as const,
   documents: (id: string) => ["documents", id] as const,
   kycRequirements: (id: string) => ["kycRequirements", id] as const,
   customerAccounts: (id: string) => ["customerAccounts", id] as const,
+  dashboard: (from: string, to: string) => ["dashboard", from, to] as const,
 };
 
 // ---------- QUERIES ----------
@@ -196,11 +198,19 @@ export function useCreateApplication() {
 export function usePatchApplication() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Partial<Application> }) =>
-      mutations.patchApplication(id, patch),
+    mutationFn: ({
+      id,
+      patch,
+      role,
+    }: {
+      id: string;
+      patch: Partial<Application>;
+      role?: RoleId;
+    }) => mutations.patchApplication(id, patch, role),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: keys.applications });
       qc.invalidateQueries({ queryKey: keys.application(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.audit(vars.id) });
     },
   });
 }
@@ -240,7 +250,8 @@ export function useSetDocStatus(custId: string) {
 export function useCreateProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: NewProductInput) => mutations.createProduct(input),
+    mutationFn: ({ input, role }: { input: NewProductInput; role?: RoleId }) =>
+      mutations.createProduct(input, role),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.products }),
   });
 }
@@ -251,13 +262,16 @@ export function useUpdateProduct() {
     mutationFn: ({
       id,
       input,
+      role,
     }: {
       id: string;
       input: Partial<NewProductInput>;
-    }) => mutations.updateProduct(id, input),
+      role?: RoleId;
+    }) => mutations.updateProduct(id, input, role),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: keys.products });
       qc.invalidateQueries({ queryKey: keys.product(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.audit(vars.id) });
     },
   });
 }
@@ -275,7 +289,10 @@ export function useUpdateUser() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<NewUserInput> }) =>
       mutations.updateUser(id, input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.users }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: keys.users });
+      qc.invalidateQueries({ queryKey: keys.audit(vars.id) });
+    },
   });
 }
 
@@ -283,15 +300,25 @@ export function useToggleUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => mutations.toggleUser(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.users }),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: keys.users });
+      qc.invalidateQueries({ queryKey: keys.audit(id) });
+    },
   });
 }
 
 export function useDisburse() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, channel }: { id: string; channel: string }) =>
-      mutations.disburse(id, channel),
+    mutationFn: ({
+      id,
+      channel,
+      role,
+    }: {
+      id: string;
+      channel: string;
+      role?: RoleId;
+    }) => mutations.disburse(id, channel, role),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.applications });
       qc.invalidateQueries({ queryKey: keys.loans });
@@ -307,12 +334,14 @@ export function useTakePayment() {
       amount,
       method,
       reference,
+      role,
     }: {
       id: string;
       amount: number;
       method?: string;
       reference?: string;
-    }) => mutations.takePayment(id, amount, method, reference),
+      role?: RoleId;
+    }) => mutations.takePayment(id, amount, method, reference, role),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: keys.loans });
       qc.invalidateQueries({ queryKey: keys.loan(vars.id) });
@@ -320,7 +349,16 @@ export function useTakePayment() {
       qc.invalidateQueries({ queryKey: keys.loanPayments(vars.id) });
       qc.invalidateQueries({ queryKey: keys.loanCharges(vars.id) });
       qc.invalidateQueries({ queryKey: keys.loanSummary(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.loanActivity(vars.id) });
     },
+  });
+}
+
+export function useLoanActivity(id: string) {
+  return useQuery({
+    queryKey: keys.loanActivity(id),
+    queryFn: () => api.loanActivity(id),
+    enabled: !!id,
   });
 }
 
@@ -330,6 +368,14 @@ export function useCustomerAccounts(custId: string) {
     queryKey: keys.customerAccounts(custId),
     queryFn: () => api.customerAccounts(custId),
     enabled: !!custId,
+  });
+}
+
+export function useDashboard(from: string, to: string) {
+  return useQuery({
+    queryKey: keys.dashboard(from, to),
+    queryFn: () => api.dashboard(from, to),
+    enabled: !!from && !!to,
   });
 }
 

@@ -10,6 +10,7 @@ import {
   useLoanSchedule,
   useLoanCharges,
 } from "@/hooks/queries";
+import { useSession } from "@/lib/session";
 import { money } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ const methodOpts = ["Cash", "M-Pesa", "Tigo Pesa", "Airtel Money", "Bank deposit
 export default function ReceivePaymentPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { role } = useSession();
   const { data: loan, isLoading } = useLoan(params.id);
   const { data: customer } = useCustomer(loan?.customer ?? "");
   const { data: sched } = useLoanSchedule(params.id);
@@ -60,7 +62,7 @@ export default function ReceivePaymentPage() {
       return;
     }
     takePayment.mutate(
-      { id: loan!.id, amount: Number(amount), method, reference },
+      { id: loan!.id, amount: Number(amount), method, reference, role },
       {
         onSuccess: () => {
           toast(`Payment of ${money(Number(amount))} received`);
