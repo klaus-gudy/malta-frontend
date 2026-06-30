@@ -243,7 +243,17 @@ export default function CustomerDetailPage() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="loans">Loans</TabsTrigger>
           <TabsTrigger value="accounts">Accounts</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="documents">
+            Documents
+            {(kycReq?.kyc ?? customer.kyc) === "Pending" && (
+              <span
+                title="KYC pending — needs verification"
+                className="ml-1.5 inline-flex min-w-[16px] items-center justify-center rounded-full bg-[#b45309] px-1 py-px text-[10px] font-semibold leading-none text-white"
+              >
+                {kycReq && kycReq.pendingDocuments > 0 ? kycReq.pendingDocuments : "!"}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 

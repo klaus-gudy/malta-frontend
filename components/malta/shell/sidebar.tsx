@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useSession } from "@/lib/session";
 import { navDef } from "@/lib/rbac";
-import { useApplications, useLoans } from "@/hooks/queries";
+import { useApplications, useCustomers, useLoans } from "@/hooks/queries";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -33,15 +33,22 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: applications } = useApplications();
   const { data: loans } = useLoans();
+  const { data: customers } = useCustomers();
 
   const badges: Record<string, number> = {
-    approvals:
+    // Customers awaiting KYC verification (pending only — rejected ones need
+    // re-evaluation, not a verification nudge).
+    customers:
+      customers?.filter((c) => c.kyc === "Pending").length ?? 0,
+    // Applications in the assessment / approval pipeline.
+    applications:
       applications?.filter((a) =>
         ["Submitted", "Under Review"].includes(a.status),
       ).length ?? 0,
     disbursements:
       applications?.filter((a) => a.status === "Approved").length ?? 0,
-    collections: loans?.filter((l) => l.status === "Overdue").length ?? 0,
+    // Overdue loan accounts needing collection follow-up.
+    accounts: loans?.filter((l) => l.status === "Overdue").length ?? 0,
   };
 
   const items = navDef.filter((n) => n.roles.includes(role));

@@ -162,6 +162,10 @@ export function useUpdateCustomer() {
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: keys.customers });
       qc.invalidateQueries({ queryKey: keys.customer(vars.id) });
+      // Completing the profile can change KYC — refresh the requirements banner
+      // and the activity timeline too.
+      qc.invalidateQueries({ queryKey: keys.kycRequirements(vars.id) });
+      qc.invalidateQueries({ queryKey: keys.audit(vars.id) });
     },
   });
 }

@@ -22,21 +22,23 @@ export const roleOptions: { id: RoleId; label: string }[] = [
   { id: "cashier", label: "Cashier" },
 ];
 
+export type BadgePage = "customers" | "applications" | "disbursements" | "accounts";
+
 export interface NavDef {
   page: string;
   href: string;
   label: string;
   icon: string;
   roles: RoleId[];
-  badgePage?: "disbursements";
+  badgePage?: BadgePage;
 }
 
 export const navDef: NavDef[] = [
   { page: "dashboard", href: "/", label: "Dashboard", icon: "LayoutDashboard", roles: ["admin", "officer", "manager", "operations", "cashier"] },
-  { page: "customers", href: "/customers", label: "Customers", icon: "Users", roles: ["admin", "officer", "manager", "operations"] },
-  { page: "applications", href: "/applications", label: "Loan Applications", icon: "FileText", roles: ["admin", "officer", "manager"] },
+  { page: "customers", href: "/customers", label: "Customers", icon: "Users", roles: ["admin", "officer", "manager", "operations"], badgePage: "customers" },
+  { page: "applications", href: "/applications", label: "Loan Applications", icon: "FileText", roles: ["admin", "officer", "manager"], badgePage: "applications" },
   { page: "disbursements", href: "/disbursements", label: "Disbursements", icon: "ArrowLeftRight", roles: ["admin", "operations", "manager"], badgePage: "disbursements" },
-  { page: "accounts", href: "/accounts", label: "Loan Accounts", icon: "Landmark", roles: ["admin", "officer", "manager", "operations", "cashier"] },
+  { page: "accounts", href: "/accounts", label: "Loan Accounts", icon: "Landmark", roles: ["admin", "officer", "manager", "operations", "cashier"], badgePage: "accounts" },
   { page: "products", href: "/products", label: "Loan Products", icon: "Settings", roles: ["admin", "manager"] },
   { page: "users", href: "/users", label: "User Management", icon: "UserCog", roles: ["admin"] },
 ];
