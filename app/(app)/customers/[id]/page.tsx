@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import {
   useApplications,
   useCustomer,
+  useCustomerAccounts,
+  useAddCustomerAccount,
+  useDeleteCustomerAccount,
   useDocuments,
   useKycRequirements,
   useLoans,
@@ -20,6 +23,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { StatusPill } from "@/components/malta/status-pill";
 import { Fact } from "@/components/malta/form";
 import { DocumentPreview } from "@/components/malta/document-preview";
@@ -50,6 +60,9 @@ export default function CustomerDetailPage() {
   const setDoc = useSetDocStatus(params.id);
   const update = useUpdateCustomer();
   const upload = useUploadDocument(params.id);
+  const { data: accounts } = useCustomerAccounts(params.id);
+  const addAccount = useAddCustomerAccount(params.id);
+  const deleteAccount = useDeleteCustomerAccount(params.id);
 
   // Profile edit state.
   const [editing, setEditing] = React.useState(false);
@@ -60,6 +73,11 @@ export default function CustomerDetailPage() {
   const [docFile, setDocFile] = React.useState<File | null>(null);
   // Document currently being previewed in the modal.
   const [previewId, setPreviewId] = React.useState<string | null>(null);
+  // Account add form.
+  const [acctOpen, setAcctOpen] = React.useState(false);
+  const [acctChannel, setAcctChannel] = React.useState("");
+  const [acctNumber, setAcctNumber] = React.useState("");
+  const [acctName, setAcctName] = React.useState("");
 
   function setTab(t: string) {
     router.replace(`/customers/${params.id}?tab=${t}`, { scroll: false });
@@ -221,6 +239,7 @@ export default function CustomerDetailPage() {
         <TabsList className="mb-[18px]">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="loans">Loans</TabsTrigger>
+          <TabsTrigger value="accounts">Accounts</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
@@ -278,37 +297,12 @@ export default function CustomerDetailPage() {
               )}
             </Card>
             <Card className="px-[18px] py-4">
-              <div className="mb-3 text-sm font-semibold">
-                Loans &amp; applications
-              </div>
-              {[
-                ...cLoans.map((l) => ({
-                  id: l.id,
-                  product: prodName(l.product),
-                  amount: money(l.principal),
-                  status: l.status,
-                  href: `/accounts/${l.id}`,
-                })),
-                ...cApps.map((a) => ({
-                  id: a.id,
-                  product: `${prodName(a.product)} · application`,
-                  amount: money(a.amount),
-                  status: a.status,
-                  href: `/applications/${a.id}`,
-                })),
-              ].map((row) => (
-                <button
-                  key={row.id}
-                  onClick={() => router.push(row.href)}
-                  className="mb-[7px] flex w-full items-center justify-between rounded-md border border-table-border px-2.5 py-2.5 text-left hover:bg-secondary"
-                >
+              <div className="mb-3 text-sm font-semibold">Loans &amp; applications</div>
+              {[...cLoans.map((l) => ({ id: l.id, product: prodName(l.product), amount: money(l.principal), status: l.status, href: `/accounts/${l.id}` })), ...cApps.map((a) => ({ id: a.id, product: `${prodName(a.product)} - application`, amount: money(a.amount), status: a.status, href: `/applications/${a.id}` }))].map((row) => (
+                <button key={row.id} onClick={() => router.push(row.href)} className="mb-[7px] flex w-full items-center justify-between rounded-md border border-table-border px-2.5 py-2.5 text-left hover:bg-secondary">
                   <div>
-                    <div className="font-mono text-[12.5px] font-semibold">
-                      {row.id}
-                    </div>
-                    <div className="text-[11px] text-[#9a948a]">
-                      {row.product}
-                    </div>
+                    <div className="font-mono text-[12.5px] font-semibold">{row.id}</div>
+                    <div className="text-[11px] text-[#9a948a]">{row.product}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-mono text-[12.5px]">{row.amount}</div>
@@ -317,9 +311,7 @@ export default function CustomerDetailPage() {
                 </button>
               ))}
               {cLoans.length + cApps.length === 0 ? (
-                <div className="py-4 text-center text-xs text-muted-foreground">
-                  No loans or applications yet.
-                </div>
+                <div className="py-4 text-center text-xs text-muted-foreground">No loans or applications yet.</div>
               ) : null}
             </Card>
           </div>
@@ -351,6 +343,67 @@ export default function CustomerDetailPage() {
                     <StatusPill status={l.status} />
                   </div>
                 </button>
+              ))
+            )}
+          </Card>
+        </TabsContent>
+
+        {/* ACCOUNTS */}
+        <TabsContent value="accounts">
+          <Card className="px-[18px] py-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <div className="text-sm font-semibold">Disbursement accounts</div>
+                <div className="mt-0.5 text-[11.5px] text-[#9a948a]">
+                  Channels &amp; account numbers on file for this customer — used to pick a disbursement destination during loan disbursement.
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setAcctOpen((o) => !o)}>
+                {acctOpen ? "Close" : "+ Add account"}
+              </Button>
+            </div>
+            {acctOpen && (
+              <div className="mb-3 rounded-lg border border-table-border bg-surface-subtle p-3.5">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                  <label className="block">
+                    <span className="text-[11.5px] font-semibold text-[#6f6a61]">Channel</span>
+                    <Select value={acctChannel} onValueChange={setAcctChannel}>
+                      <SelectTrigger className="mt-[5px] h-[36px]"><SelectValue placeholder="Select channel" /></SelectTrigger>
+                      <SelectContent>
+                        {["M-Pesa", "Tigo Pesa", "Airtel Money", "Bank - CRDB", "Bank - NMB", "Bank - Other"].map((ch) => (
+                          <SelectItem key={ch} value={ch}>{ch}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </label>
+                  <label className="block">
+                    <span className="text-[11.5px] font-semibold text-[#6f6a61]">Account / number</span>
+                    <Input className="mt-[5px] h-[36px] font-mono" placeholder="+255 7... or bank acct" value={acctNumber} onChange={(e) => setAcctNumber(e.target.value)} />
+                  </label>
+                  <label className="block">
+                    <span className="text-[11.5px] font-semibold text-[#6f6a61]">Account name</span>
+                    <Input className="mt-[5px] h-[36px]" placeholder="Name on account" value={acctName} onChange={(e) => setAcctName(e.target.value)} />
+                  </label>
+                </div>
+                <Button size="sm" className="mt-2.5" disabled={!acctChannel || !acctNumber || addAccount.isPending} onClick={() => addAccount.mutate({ channel: acctChannel, accountNumber: acctNumber, accountName: acctName }, { onSuccess: () => { toast("Account added"); setAcctOpen(false); setAcctChannel(""); setAcctNumber(""); setAcctName(""); }, onError: (e: Error) => toast(e.message || "Could not add account") })}>
+                  {addAccount.isPending ? "Adding..." : "Save account"}
+                </Button>
+              </div>
+            )}
+            {(accounts ?? []).length === 0 && !acctOpen ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">No disbursement accounts registered yet.</div>
+            ) : (
+              (accounts ?? []).map((acct) => (
+                <div key={acct.id} className="mb-[7px] flex items-center justify-between rounded-md border border-table-border px-3 py-2.5">
+                  <div>
+                    <div className="flex items-center gap-2 text-[12.5px] font-semibold">
+                      {acct.channel}
+                      {acct.isPrimary && <span className="rounded bg-[#e6f4ee] px-1.5 py-px text-[10px] font-semibold text-[#047857]">Primary</span>}
+                    </div>
+                    <div className="font-mono text-[11.5px] text-[#9a948a]">{acct.accountNumber}{acct.accountName ? ` - ${acct.accountName}` : ""}</div>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-[11px] text-destructive" onClick={() => deleteAccount.mutate(acct.id, { onSuccess: () => toast("Account removed") })}>Remove</Button>
+                </div>
               ))
             )}
           </Card>

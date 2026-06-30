@@ -9,6 +9,7 @@ import type {
   Application,
   ApplicationStatus,
   Customer,
+  CustomerAccount,
   CustomerDocument,
   Installment,
   KycStatus,
@@ -79,6 +80,9 @@ const post = <T>(path: string, body?: unknown) =>
 const patch = <T>(path: string, body?: unknown) =>
   request<T>(path, { method: "PATCH", body: JSON.stringify(body ?? {}) });
 
+const del = <T>(path: string) =>
+  request<T>(path, { method: "DELETE" });
+
 // ---------- QUERIES ----------
 export const api = {
   customers: () => get<Customer[]>("/customers"),
@@ -107,6 +111,8 @@ export const api = {
     ),
   kycRequirements: (custId: string) =>
     get<KycRequirements>(`/customers/${custId}/kyc-requirements`),
+  customerAccounts: (custId: string) =>
+    get<CustomerAccount[]>(`/customers/${custId}/accounts`),
 };
 
 export interface KycRequirements {
@@ -259,4 +265,13 @@ export const mutations = {
     reference?: string,
   ): Promise<Loan | null> =>
     post<Loan | null>(`/loans/${loanId}/payments`, { amount, method, reference }),
+
+  addCustomerAccount: (
+    custId: string,
+    input: { channel: string; accountNumber: string; accountName?: string; isPrimary?: boolean },
+  ): Promise<CustomerAccount> =>
+    post<CustomerAccount>(`/customers/${custId}/accounts`, input),
+
+  deleteCustomerAccount: (acctId: string): Promise<void> =>
+    del<void>(`/customers/accounts/${acctId}`),
 };

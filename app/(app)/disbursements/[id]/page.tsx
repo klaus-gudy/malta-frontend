@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   useApplication,
   useCustomer,
+  useCustomerAccounts,
   useProduct,
   useDisburse,
 } from "@/hooks/queries";
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Field } from "@/components/malta/form";
 
-const channelOpts = ["M-Pesa", "Tigo Pesa", "Airtel Money", "Bank transfer — CRDB", "Bank transfer — NMB", "Cash"];
+const FALLBACK_CHANNELS = ["M-Pesa", "Tigo Pesa", "Airtel Money", "Bank transfer — CRDB", "Bank transfer — NMB", "Cash"];
 
 export default function DisbursementDetailPage() {
   const params = useParams<{ id: string }>();
@@ -35,10 +36,11 @@ export default function DisbursementDetailPage() {
   const { data: app, isLoading } = useApplication(params.id);
   const { data: customer } = useCustomer(app?.customer ?? "");
   const { data: product } = useProduct(app?.product ?? "");
+  const { data: custAccounts } = useCustomerAccounts(app?.customer ?? "");
   const disburse = useDisburse();
 
-  const [channel, setChannel] = React.useState("");
-  const [account, setAccount] = React.useState("");
+  const [selectedAcct, setSelectedAcct] = React.useState("");
+  const selectedAccount = (custAccounts ?? []).find((a) => a.id === selectedAcct);
   const [accepted, setAccepted] = React.useState(false);
 
   if (isLoading) return <Skeleton className="h-96 max-w-[1020px]" />;
@@ -52,15 +54,16 @@ export default function DisbursementDetailPage() {
   const canDisburse = can(role, "disburse");
 
   function execute() {
-    if (!channel) {
-      toast("Select a disbursement channel");
+    if (!selectedAccount) {
+      toast("Select a disbursement account");
       return;
     }
+    const channel = `${selectedAccount.channel} · ${selectedAccount.accountNumber}`;
     disburse.mutate(
       { id: app!.id, channel },
       {
         onSuccess: () => {
-          toast(`Loan disbursed via ${channel}`);
+          toast(`Loan disbursed to ${selectedAccount.channel} — ${selectedAccount.accountNumber}`);
           router.push("/accounts");
         },
       },
@@ -122,17 +125,49 @@ export default function DisbursementDetailPage() {
 
         <Card className="px-5 py-[18px]">
           <div className="mb-3.5 text-sm font-semibold">Execute disbursement</div>
-          <Field label="Disbursement channel" className="mb-3.5">
-            <Select value={channel} onValueChange={setChannel}>
-              <SelectTrigger><SelectValue placeholder="— select channel —" /></SelectTrigger>
-              <SelectContent>
-                {channelOpts.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <Field label="Disbursement account" className="mb-3.5">
+            {(custAccounts ?? []).length > 0 ? (
+              <Select value={selectedAcct} onValueChange={setSelectedAcct}>
+                <SelectTrigger><SelectValue placeholder="— select account —" /></SelectTrigger>
+                <SelectContent>
+                  {(custAccounts ?? []).map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.channel} · {a.accountNumber}
+                      {a.isPrimary ? " (Primary)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="rounded-md border border-table-border bg-surface-subtle px-3.5 py-2.5 text-xs text-[#9a948a]">
+                No accounts on file for this customer.{" "}
+                <button
+                  className="font-semibold text-primary-dark underline"
+                  onClick={() => router.push(`/customers/${app!.customer}?tab=overview`)}
+                >
+                  Add one in their profile
+                </button>.
+              </div>
+            )}
           </Field>
-          <Field label="Recipient account / number" className="mb-3.5">
-            <Input className="font-mono" placeholder="+255 7… or bank account" value={account} onChange={(e) => setAccount(e.target.value)} />
-          </Field>
+          {selectedAccount && (
+            <div className="mb-3.5 rounded-md border border-table-border bg-surface-subtle px-3.5 py-2.5">
+              <div className="flex justify-between text-[12.5px]">
+                <span className="text-[#6f6a61]">Channel</span>
+                <span className="font-medium">{selectedAccount.channel}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-[12.5px]">
+                <span className="text-[#6f6a61]">Account</span>
+                <span className="font-mono">{selectedAccount.accountNumber}</span>
+              </div>
+              {selectedAccount.accountName && (
+                <div className="mt-1 flex justify-between text-[12.5px]">
+                  <span className="text-[#6f6a61]">Name</span>
+                  <span>{selectedAccount.accountName}</span>
+                </div>
+              )}
+            </div>
+          )}
           {canDisburse ? (
             <Button className="h-[42px] w-full bg-[#047857]" onClick={execute} disabled={disburse.isPending}>
               {disburse.isPending ? "Disbursing…" : `Disburse ${money(net)}`}

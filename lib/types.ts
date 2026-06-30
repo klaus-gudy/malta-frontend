@@ -33,6 +33,15 @@ export interface Customer {
   photo: string;
 }
 
+export interface CustomerAccount {
+  id: string;
+  customerId: string;
+  channel: string;
+  accountNumber: string;
+  accountName: string;
+  isPrimary: boolean;
+}
+
 export interface Product {
   id: string;
   name: string;

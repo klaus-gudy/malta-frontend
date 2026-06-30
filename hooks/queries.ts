@@ -35,6 +35,7 @@ export const keys = {
   audit: (id: string) => ["audit", id] as const,
   documents: (id: string) => ["documents", id] as const,
   kycRequirements: (id: string) => ["kycRequirements", id] as const,
+  customerAccounts: (id: string) => ["customerAccounts", id] as const,
 };
 
 // ---------- QUERIES ----------
@@ -320,5 +321,37 @@ export function useTakePayment() {
       qc.invalidateQueries({ queryKey: keys.loanCharges(vars.id) });
       qc.invalidateQueries({ queryKey: keys.loanSummary(vars.id) });
     },
+  });
+}
+
+// ---------- CUSTOMER ACCOUNTS ----------
+export function useCustomerAccounts(custId: string) {
+  return useQuery({
+    queryKey: keys.customerAccounts(custId),
+    queryFn: () => api.customerAccounts(custId),
+    enabled: !!custId,
+  });
+}
+
+export function useAddCustomerAccount(custId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      channel: string;
+      accountNumber: string;
+      accountName?: string;
+      isPrimary?: boolean;
+    }) => mutations.addCustomerAccount(custId, input),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: keys.customerAccounts(custId) }),
+  });
+}
+
+export function useDeleteCustomerAccount(custId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (acctId: string) => mutations.deleteCustomerAccount(acctId),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: keys.customerAccounts(custId) }),
   });
 }
