@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Power, Search } from "lucide-react";
+import { Bell, Power } from "lucide-react";
 import { useSession, useRoleMeta } from "@/lib/session";
 import { navDef, roleMeta, roleOptions } from "@/lib/rbac";
 import { initials } from "@/lib/format";
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { GlobalSearch } from "@/components/malta/shell/global-search";
 import { toast } from "sonner";
 
 // Map a pathname back to its top-level module label for the breadcrumb.
@@ -35,7 +36,6 @@ export function Topbar() {
   const pathname = usePathname();
   const { role, setRole, logout, homeFor } = useSession();
   const meta = useRoleMeta();
-  const [search, setSearch] = React.useState("");
 
   const moduleLabel =
     pathname === "/"
@@ -72,27 +72,16 @@ export function Topbar() {
       </div>
 
       <div className="flex flex-1 justify-center">
-        <div className="relative w-full max-w-[420px]">
-          <Search className="absolute left-3 top-1/2 size-[15px] -translate-y-1/2 text-[#b3ada3]" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search customers, loans, applications…"
-            className="h-9 w-full rounded-md border border-input-soft bg-background pl-8 pr-3 text-[13px] outline-none focus:border-primary"
-          />
-        </div>
+        <GlobalSearch />
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-3.5">
-        <div className="flex items-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-[#9a948a]">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.05em] text-[#9a948a] max-md:hidden">
             View as
           </span>
           <Select value={role} onValueChange={onRoleChange}>
-            <SelectTrigger
-              size="sm"
-              className="h-auto w-auto gap-1 border-0 bg-transparent px-0 text-[12.5px] font-semibold text-primary-dark focus-visible:ring-0"
-            >
+            <SelectTrigger size="sm" className="w-[150px] font-semibold text-primary-dark">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
